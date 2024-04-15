@@ -1,6 +1,9 @@
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 class Personagem{
@@ -80,17 +83,6 @@ class Personagem{
         return name;
     }
     public String[] getAlternate_names() {
-        String aux = "";
-        if (alternate_names.length > 1) {
-            for (int i = 0; i < alternate_names.length; i++) {
-                aux = aux + alternate_names[i];
-                if (i != alternate_names.length - 1) {
-                    aux = aux + ',';
-                }
-            }
-        } else {
-            aux = alternate_names[0];
-        }
         return alternate_names;
     }
     public String getHouse() {
@@ -192,12 +184,12 @@ class Personagem{
 
     public static String ler(String entradaid) throws Exception {
         String entrada = "";
-        BufferedReader arq = new BufferedReader(new InputStreamReader(new FileInputStream("C:\\Users\\WazX\\Desktop\\aeds2-master\\tps\\entrada e saida\\tp02\\characters.csv")));
-        //C:\\Users\WazX\\Desktop\\aeds2-master\\tps\\entrada e saida\tp02\\characters.csv    /tmp/characters.csv
+        BufferedReader arq = new BufferedReader(new InputStreamReader(new FileInputStream("/tmp/characters.csv")));
+        //C:\\Users\\WazX\\Desktop\\aeds2-master\\tps\\entrada e saida\\tp02\\characters.csv    /tmp/characters.csv
 
         entrada = arq.readLine();
         while(entrada != null){
-            String[] Ids = entrada.split(",");
+            String[] Ids = entrada.split(";");
             if(Ids[0].equals(entradaid) == true){
                 return entrada;
             }
@@ -210,49 +202,94 @@ class Personagem{
 
     public static void TratarString(String entrada)throws Exception{
         int tam = entrada.length();
-        if(entrada.charAt(tam-1) == ','){
+        if (entrada.charAt(tam - 1) == ';') {
             entrada = entrada + "nao informado";
         }
-        entrada = entrada.replaceAll(",,", ",nao informado,");
-        String[] HPpersonagens = entrada.split(",");
+        entrada = entrada.replaceAll(";;", ";nao informado;");
+        String[] HPpersonagens = entrada.split(";");
 
-        // ID do jogador
+        // ID do Personagem
         personagens[tampersonagens].setId(HPpersonagens[0]);
-        // Nome do jogador
+        // Nome do Personagem
         personagens[tampersonagens].setName(HPpersonagens[1]);
-        // Altura do jogador
-        //personagens[tampersonagens].setAlternate_names(HPpersonagens[2]);
-        // Peso do jogador
-        personagens[tampersonagens].setHouse(HPpersonagens[3]);
-        // Universidade do jogador
-        personagens[tampersonagens].setAncestry(HPpersonagens[4]);
-        // Ano de nascimento do jogador
-        personagens[tampersonagens].setSpecies(HPpersonagens[5]);
-        // Cidade do  jogador
-        personagens[tampersonagens].setPatronus(HPpersonagens[6]);
-        // Estado do jogador
+        // Alternate_names do Personagem
+        int inicio = HPpersonagens[2].indexOf('[');
+        int fim = HPpersonagens[2].indexOf(']');
+        if (inicio != -1 && fim != -1 && fim > inicio) {
+            String alternateNames = HPpersonagens[2].substring(inicio + 1, fim);
+            alternateNames = alternateNames.replaceAll("'", "");
+            personagens[tampersonagens].setAlternate_names(alternateNames.split(","));
+        }
+        // House do Personagem
+        if (!HPpersonagens[3].equals("[]")) {
+            personagens[tampersonagens].setHouse(HPpersonagens[3]);
+        } else {
+            personagens[tampersonagens].setHouse("nao informado");
+        }
+        // Ancestry do Personagem
+        if (!HPpersonagens[4].equals("[]")) {
+            personagens[tampersonagens].setAncestry(HPpersonagens[4]);
+        } else {
+            personagens[tampersonagens].setAncestry("nao informado");
+        }
+        // Species do Personagem
+        if (!HPpersonagens[5].equals("[]")) {
+            personagens[tampersonagens].setSpecies(HPpersonagens[5]);
+        } else {
+            personagens[tampersonagens].setSpecies("nao informado");
+        }
+        // Patronous do Personagem
+        if (!HPpersonagens[6].equals("[]")) {
+            personagens[tampersonagens].setPatronus(HPpersonagens[6]);
+        } else {
+            personagens[tampersonagens].setPatronus("nao informado");
+        }
+        // HogwartsStaff do Personagem
         boolean hogwartsStaff = Boolean.parseBoolean(HPpersonagens[7]);
         personagens[tampersonagens].setHogwartsStaff(hogwartsStaff);
-        //
-        personagens[tampersonagens].setHogwartsStudent(HPpersonagens[8]);
-        //
-        personagens[tampersonagens].setActorName(HPpersonagens[8]);
-        //
-        boolean alive = Boolean.parseBoolean(HPpersonagens[9]);
+        // Hogwartstudent do Personagem
+        boolean hogwartsStudent = Boolean.parseBoolean(HPpersonagens[8]);
+        personagens[tampersonagens].setHogwartsStudent(String.valueOf(hogwartsStudent));
+        // Ator do Personagem
+        personagens[tampersonagens].setActorName(HPpersonagens[9]);
+        // Personagem Alive
+        boolean alive = Boolean.parseBoolean(HPpersonagens[10]);
         personagens[tampersonagens].setAlive(alive);
-        //
-        //data 11
-        //
-        int anonascimento = Integer.parseInt(HPpersonagens[12]);
+        // Date of birth do Personagem
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        if (!HPpersonagens[12].equals("[]")) {
+            try {
+                Date dataNascimento = sdf.parse(HPpersonagens[12]);
+                personagens[tampersonagens].setDateOfBirth(dataNascimento);
+            } catch (ParseException e) {
+                personagens[tampersonagens].setDateOfBirth(new Date());
+            }
+        } else {
+            personagens[tampersonagens].setDateOfBirth(new Date());
+        }
+        // Year of birth do Personagem
+        int anonascimento = Integer.parseInt(HPpersonagens[13]);
         personagens[tampersonagens].setYearOfBirth(anonascimento);
-        //
-        personagens[tampersonagens].setEyeColour(HPpersonagens[13]);
-        //
-        personagens[tampersonagens].setGender(HPpersonagens[14]);
-        //
-        personagens[tampersonagens].setHairColour(HPpersonagens[15]);
-        //
-        boolean wizard = Boolean.parseBoolean(HPpersonagens[16]);
+        // Eye Colour do Personagem
+        if (!HPpersonagens[14].equals("[]")) {
+            personagens[tampersonagens].setEyeColour(HPpersonagens[14]);
+        } else {
+            personagens[tampersonagens].setEyeColour("nao informado");
+        }
+        // Gender do Personagem
+        if (!HPpersonagens[15].equals("[]")) {
+            personagens[tampersonagens].setGender(HPpersonagens[15]);
+        } else {
+            personagens[tampersonagens].setGender("nao informado");
+        }
+        // Hair Colour do Personagem
+        if (!HPpersonagens[16].equals("[]")) {
+            personagens[tampersonagens].setHairColour(HPpersonagens[16]);
+        } else {
+            personagens[tampersonagens].setHairColour("nao informado");
+        }
+        // Wizard do Personagem
+        boolean wizard = HPpersonagens[17].equalsIgnoreCase("verdadeiro");
         personagens[tampersonagens].setWizard(wizard);
     }
 
@@ -284,25 +321,35 @@ class Personagem{
 
     // IMPRIMIR
     public static void imprimir(){
-        System.out.println("["+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String dataNascimentoFormatada = (personagens[tampersonagens].getDateOfBirth() != null) ? sdf.format(personagens[tampersonagens].getDateOfBirth()) : "N/A";
+
+        System.out.print("["+
         personagens[tampersonagens].getId()+" ## "+
-        personagens[tampersonagens].getName()+" ## "+
-        personagens[tampersonagens].getAlternate_names()+" ## "+
-        personagens[tampersonagens].getHouse()+" ## "+ 
-        personagens[tampersonagens].getAncestry()+" ## "+ 
+        personagens[tampersonagens].getName()+" ## ");
+        String[] alternateNames = personagens[tampersonagens].getAlternate_names();
+        System.out.print("{");
+        for (int i = 0; i < alternateNames.length; i++) {
+            System.out.print(alternateNames[i]);
+            if (i < alternateNames.length - 1) {
+                System.out.print(",");
+            }
+        }
+        System.out.print("} ## ");
+        System.out.print(personagens[tampersonagens].getHouse()+" ## "+ 
+        personagens[tampersonagens].getAncestry()+" ## "+
+        personagens[tampersonagens].getSpecies()+" ## "+ 
         personagens[tampersonagens].getPatronus()+" ## "+
         personagens[tampersonagens].getHogwartsStaff()+" ## " +
-        personagens[tampersonagens].getHogwartsStudent()+
-        personagens[tampersonagens].getHogwartsStaff()+" ## "+
+        personagens[tampersonagens].getHogwartsStudent()+" ## " +
         personagens[tampersonagens].getActorName()+" ## " +
         personagens[tampersonagens].getAlive()+" ## " +
-        personagens[tampersonagens].getDateOfBirth()+" ## " +
+        dataNascimentoFormatada+" ## " +
         personagens[tampersonagens].getYearOfBirth()+" ## " +
         personagens[tampersonagens].getEyeColour()+" ## " +
         personagens[tampersonagens].getGender()+" ## " +
         personagens[tampersonagens].getHairColour()+" ## " +
-        personagens[tampersonagens].getWizard()+
-        "]");
+        personagens[tampersonagens].getWizard()+"]\n");
     }
 }
 
@@ -313,7 +360,6 @@ public class Questao1 extends Personagem{
         String IdsPersonagens = "";
         BufferedReader entrada = new BufferedReader(new InputStreamReader(System.in));
         IdsPersonagens = entrada.readLine();
-        System.out.println(IdsPersonagens);
         while(IdsPersonagens.equals("FIM") != true){
             personagens[tampersonagens] = new Personagem();
             TratarString(ler(IdsPersonagens));
