@@ -8,9 +8,6 @@ import java.util.Date;
 
 class Personagem{
 
-    public static Personagem[] personagens = new Personagem[1000];
-    public static int tampersonagens = 0;
-
     private String id;
     private String name;
     private String[] alternate_names;
@@ -180,6 +177,39 @@ class Personagem{
         this.wizard = wizard;
     }
 
+    // CLONE
+
+    public Personagem Clone(){
+        Personagem clone = new Personagem();
+
+        clone.id = id ;
+        clone.name = name;
+        clone.alternate_names =alternate_names;
+        clone.house = house;
+        clone.ancestry = ancestry;
+        clone.species = species;
+        clone.patronus = patronus;
+        clone.hogwartsStaff = hogwartsStaff;
+        clone.hogwartsStudent = hogwartsStudent;
+        clone.actorName = actorName;
+        clone.alive = alive;
+        clone.dateOfBirth = dateOfBirth;
+        clone.yearOfBirth = yearOfBirth;
+        clone.eyeColour = eyeColour;
+        clone.gender = gender;
+        clone.hairColour = hairColour;
+        clone.wizard = wizard;
+
+        return clone;
+    }
+}
+
+public class Questao13{
+
+    public static Personagem[] personagens = new Personagem[1000];
+    public static int tampersonagens = 0;
+    public static int contador = 0;
+
     // LEITURA
 
     public static String ler(String entradaid) throws Exception {
@@ -293,69 +323,112 @@ class Personagem{
         personagens[tampersonagens].setWizard(wizard);
     }
 
-    // CLONE
-
-    public Personagem Clone(){
-        Personagem clone = new Personagem();
-
-        clone.id = id ;
-        clone.name = name;
-        clone.alternate_names =alternate_names;
-        clone.house = house;
-        clone.ancestry = ancestry;
-        clone.species = species;
-        clone.patronus = patronus;
-        clone.hogwartsStaff = hogwartsStaff;
-        clone.hogwartsStudent = hogwartsStudent;
-        clone.actorName = actorName;
-        clone.alive = alive;
-        clone.dateOfBirth = dateOfBirth;
-        clone.yearOfBirth = yearOfBirth;
-        clone.eyeColour = eyeColour;
-        clone.gender = gender;
-        clone.hairColour = hairColour;
-        clone.wizard = wizard;
-
-        return clone;
-    }
-
     // IMPRIMIR
     public static void imprimir(){
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        String dataNascimentoFormatada = (personagens[tampersonagens].getDateOfBirth() != null) ? sdf.format(personagens[tampersonagens].getDateOfBirth()) : "N/A";
 
-        System.out.print("["+
-        personagens[tampersonagens].getId()+" ## "+
-        personagens[tampersonagens].getName()+" ## ");
-        String[] alternateNames = personagens[tampersonagens].getAlternate_names();
-        System.out.print("{");
-        for (int i = 0; i < alternateNames.length; i++) {
-            System.out.print(alternateNames[i]);
-            if (i < alternateNames.length - 1) {
-                System.out.print(",");
+        for(int i =0 ; i < tampersonagens ; i++){
+            System.out.print("["+personagens[i].getId()+" ## "+personagens[i].getName()+" ## ");
+            String[] alternateNames = personagens[i].getAlternate_names();
+            System.out.print("{");
+            for (int j = 0; j < alternateNames.length; j++) {
+                System.out.print(alternateNames[j]);
+                if (j < alternateNames.length - 1) {
+                    System.out.print(",");
+                }
+            }
+            System.out.print("} ## "+personagens[i].getHouse()+
+            " ## "+ personagens[i].getAncestry()+" ## "+ personagens[i].getSpecies()+" ## "+personagens[i].getPatronus()+
+            " ## " +personagens[i].getHogwartsStaff()+" ## " +personagens[i].getHogwartsStudent()+" ## " +personagens[i].getActorName()+
+            " ## " +personagens[i].getAlive()+" ## " + sdf.format(personagens[i].getDateOfBirth())+" ## " +personagens[i].getYearOfBirth()+
+            " ## " +personagens[i].getEyeColour()+" ## " +personagens[i].getGender()+" ## " +personagens[i].getHairColour()+
+            " ## " +personagens[i].getWizard()+"]\n");
+        }
+    }
+
+    public static void Desempate(){
+        Personagem tmp;
+
+        for(int i=0 ; i <tampersonagens ; i++ ){
+            for(int j=i+1 ; j <tampersonagens ; j++ ){
+                if(personagens[i].getActorName().compareTo(personagens[j].getActorName()) == 0){
+                    if(personagens[i].getName().compareTo(personagens[j].getName())>0){
+                        tmp = personagens[i];
+                        personagens[i] = personagens[j];
+                        personagens[j] = tmp;
+                    }
+                }else{
+                    j = tampersonagens;
+                }
             }
         }
-        System.out.print("} ## ");
-        System.out.print(personagens[tampersonagens].getHouse()+" ## "+ 
-        personagens[tampersonagens].getAncestry()+" ## "+
-        personagens[tampersonagens].getSpecies()+" ## "+ 
-        personagens[tampersonagens].getPatronus()+" ## "+
-        personagens[tampersonagens].getHogwartsStaff()+" ## " +
-        personagens[tampersonagens].getHogwartsStudent()+" ## " +
-        personagens[tampersonagens].getActorName()+" ## " +
-        personagens[tampersonagens].getAlive()+" ## " +
-        dataNascimentoFormatada+" ## " +
-        personagens[tampersonagens].getYearOfBirth()+" ## " +
-        personagens[tampersonagens].getEyeColour()+" ## " +
-        personagens[tampersonagens].getGender()+" ## " +
-        personagens[tampersonagens].getHairColour()+" ## " +
-        personagens[tampersonagens].getWizard()+"]\n");
     }
-}
 
-public class Questao1 extends Personagem{
+    public static void sort() {
+        mergesort(0, tampersonagens-1);
+    }
+  
+    /**
+    * Algoritmo de ordenacao Mergesort.
+    * @param int esq inicio do array a ser ordenado
+    * @param int dir fim do array a ser ordenado
+    */
+    public static void mergesort(int esq, int dir) {
+        if (personagens != null && esq < dir && dir >= 0 && esq < personagens.length && personagens.length != 0){
+            contador++;
+            int meio = (esq + dir) / 2;
+            mergesort(esq, meio);
+            mergesort(meio + 1, dir);
+            intercalar(esq, meio, dir);
+        }
+    }
+  
+    /**
+    * Algoritmo que intercala os elementos entre as posicoes esq e dir
+    * @param int esq inicio do array a ser ordenado
+    * @param int meio posicao do meio do array a ser ordenado
+    * @param int dir fim do array a ser ordenado
+    */ 
+    public static void intercalar(int esq, int meio, int dir){
+        Personagem[] tmp = new Personagem[personagens.length];
+
+        for(int i = esq ; i<= dir ; i++){
+            tmp[i] = personagens[i];
+        }
+        
+        int n1 = esq;
+        int n2 = meio+1;
+        int n3 = esq;
+
+        while(n1 <= meio && n2 <= dir){
+            if(tmp[n1].getActorName().compareTo(tmp[n2].getActorName()) <= 0){
+                personagens[n3] = tmp[n1];
+                n1++;
+            }else{
+                personagens[n3] = tmp[n2];
+                n2++;
+            }
+            n3++;
+        }
+
+        while(n1 <= meio){
+            personagens[n3] = tmp[n1];
+            n1++;
+            n3++;
+        }
+
+        while (n2 <= dir) {
+            personagens[n3] = personagens[n2];
+            n2++;
+            n3++;
+        }
+    }
 
     public static void main(String[] args) throws Exception {
+
+        //tempo inicial do código
+        long tempoInicial = System.currentTimeMillis();
+        //----------------------------------------------//
         
         String IdsPersonagens = "";
         BufferedReader entrada = new BufferedReader(new InputStreamReader(System.in));
@@ -363,9 +436,17 @@ public class Questao1 extends Personagem{
         while(IdsPersonagens.equals("FIM") != true){
             personagens[tampersonagens] = new Personagem();
             TratarString(ler(IdsPersonagens));
-            imprimir();
             tampersonagens += 1;
             IdsPersonagens = entrada.readLine();
         }
+        sort(); 
+        Desempate();
+        imprimir();
+
+        //arquivo de Matricula mergesort
+        long tempoFinal = System.currentTimeMillis();
+        Arq.openWrite("matrícula_mergesort.txt");
+        Arq.println("695161" + "\t" + (tempoFinal - tempoInicial) + "\t" + contador);
+        Arq.close();
     }
 }

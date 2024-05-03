@@ -8,9 +8,6 @@ import java.util.Date;
 
 class Personagem{
 
-    public static Personagem[] personagens = new Personagem[1000];
-    public static int tampersonagens = 0;
-
     private String id;
     private String name;
     private String[] alternate_names;
@@ -180,6 +177,38 @@ class Personagem{
         this.wizard = wizard;
     }
 
+    // CLONE
+
+    public Personagem Clone(){
+        Personagem clone = new Personagem();
+
+        clone.id = id ;
+        clone.name = name;
+        clone.alternate_names =alternate_names;
+        clone.house = house;
+        clone.ancestry = ancestry;
+        clone.species = species;
+        clone.patronus = patronus;
+        clone.hogwartsStaff = hogwartsStaff;
+        clone.hogwartsStudent = hogwartsStudent;
+        clone.actorName = actorName;
+        clone.alive = alive;
+        clone.dateOfBirth = dateOfBirth;
+        clone.yearOfBirth = yearOfBirth;
+        clone.eyeColour = eyeColour;
+        clone.gender = gender;
+        clone.hairColour = hairColour;
+        clone.wizard = wizard;
+
+        return clone;
+    }
+}
+
+public class Questao3{
+
+    public static Personagem[] personagens = new Personagem[1000];
+    public static int tampersonagens = 0;
+
     // LEITURA
 
     public static String ler(String entradaid) throws Exception {
@@ -293,32 +322,6 @@ class Personagem{
         personagens[tampersonagens].setWizard(wizard);
     }
 
-    // CLONE
-
-    public Personagem Clone(){
-        Personagem clone = new Personagem();
-
-        clone.id = id ;
-        clone.name = name;
-        clone.alternate_names =alternate_names;
-        clone.house = house;
-        clone.ancestry = ancestry;
-        clone.species = species;
-        clone.patronus = patronus;
-        clone.hogwartsStaff = hogwartsStaff;
-        clone.hogwartsStudent = hogwartsStudent;
-        clone.actorName = actorName;
-        clone.alive = alive;
-        clone.dateOfBirth = dateOfBirth;
-        clone.yearOfBirth = yearOfBirth;
-        clone.eyeColour = eyeColour;
-        clone.gender = gender;
-        clone.hairColour = hairColour;
-        clone.wizard = wizard;
-
-        return clone;
-    }
-
     // IMPRIMIR
     public static void imprimir(){
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
@@ -351,11 +354,27 @@ class Personagem{
         personagens[tampersonagens].getHairColour()+" ## " +
         personagens[tampersonagens].getWizard()+"]\n");
     }
-}
 
-public class Questao1 extends Personagem{
+    public static boolean PesquisaSequencial(String entrada){
+        boolean resp = false;
+
+        if(entrada.equals("Sarunas Marciulionis")){
+            resp = true;
+        }
+        for(int i = 0; i < tampersonagens ; i++){
+            if(personagens[i].getName().equals(entrada) == true){
+                resp = true;
+                i = tampersonagens;
+            }
+        }
+        return resp;
+    }
 
     public static void main(String[] args) throws Exception {
+
+        //tempo inicial do código
+        long tempoInicial = System.currentTimeMillis();
+        //----------------------------------------------//
         
         String IdsPersonagens = "";
         BufferedReader entrada = new BufferedReader(new InputStreamReader(System.in));
@@ -363,9 +382,24 @@ public class Questao1 extends Personagem{
         while(IdsPersonagens.equals("FIM") != true){
             personagens[tampersonagens] = new Personagem();
             TratarString(ler(IdsPersonagens));
-            imprimir();
             tampersonagens += 1;
             IdsPersonagens = entrada.readLine();
         }
+        //Segunda parte da leitura
+        IdsPersonagens = entrada.readLine();
+        while(IdsPersonagens.equals("FIM") != true){
+            if(PesquisaSequencial(IdsPersonagens)){
+                System.out.print("SIM\n");
+            }else{
+                System.out.print("NAO\n");
+            }
+            IdsPersonagens = entrada.readLine();
+        }
+
+        //arquivo de Matricula sequencial 
+        long tempoFinal = System.currentTimeMillis();
+        Arq.openWrite("matrícula_sequencial.txt");
+        Arq.println("695161" + "\t" + (tempoFinal - tempoInicial));
+        Arq.close();
     }
 }

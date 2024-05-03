@@ -8,9 +8,6 @@ import java.util.Date;
 
 class Personagem{
 
-    public static Personagem[] personagens = new Personagem[1000];
-    public static int tampersonagens = 0;
-
     private String id;
     private String name;
     private String[] alternate_names;
@@ -180,8 +177,39 @@ class Personagem{
         this.wizard = wizard;
     }
 
-    // LEITURA
+    // CLONE
 
+    public Personagem Clone(){
+        Personagem clone = new Personagem();
+
+        clone.id = id ;
+        clone.name = name;
+        clone.alternate_names =alternate_names;
+        clone.house = house;
+        clone.ancestry = ancestry;
+        clone.species = species;
+        clone.patronus = patronus;
+        clone.hogwartsStaff = hogwartsStaff;
+        clone.hogwartsStudent = hogwartsStudent;
+        clone.actorName = actorName;
+        clone.alive = alive;
+        clone.dateOfBirth = dateOfBirth;
+        clone.yearOfBirth = yearOfBirth;
+        clone.eyeColour = eyeColour;
+        clone.gender = gender;
+        clone.hairColour = hairColour;
+        clone.wizard = wizard;
+
+        return clone;
+    }
+}
+
+public class Questao5{
+
+    public static Personagem[] personagens = new Personagem[1000];
+    public static int tampersonagens = 0;
+
+    // LEITURA
     public static String ler(String entradaid) throws Exception {
         String entrada = "";
         BufferedReader arq = new BufferedReader(new InputStreamReader(new FileInputStream("/tmp/characters.csv")));
@@ -293,69 +321,54 @@ class Personagem{
         personagens[tampersonagens].setWizard(wizard);
     }
 
-    // CLONE
-
-    public Personagem Clone(){
-        Personagem clone = new Personagem();
-
-        clone.id = id ;
-        clone.name = name;
-        clone.alternate_names =alternate_names;
-        clone.house = house;
-        clone.ancestry = ancestry;
-        clone.species = species;
-        clone.patronus = patronus;
-        clone.hogwartsStaff = hogwartsStaff;
-        clone.hogwartsStudent = hogwartsStudent;
-        clone.actorName = actorName;
-        clone.alive = alive;
-        clone.dateOfBirth = dateOfBirth;
-        clone.yearOfBirth = yearOfBirth;
-        clone.eyeColour = eyeColour;
-        clone.gender = gender;
-        clone.hairColour = hairColour;
-        clone.wizard = wizard;
-
-        return clone;
-    }
-
     // IMPRIMIR
     public static void imprimir(){
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        String dataNascimentoFormatada = (personagens[tampersonagens].getDateOfBirth() != null) ? sdf.format(personagens[tampersonagens].getDateOfBirth()) : "N/A";
 
-        System.out.print("["+
-        personagens[tampersonagens].getId()+" ## "+
-        personagens[tampersonagens].getName()+" ## ");
-        String[] alternateNames = personagens[tampersonagens].getAlternate_names();
-        System.out.print("{");
-        for (int i = 0; i < alternateNames.length; i++) {
-            System.out.print(alternateNames[i]);
-            if (i < alternateNames.length - 1) {
-                System.out.print(",");
+        for(int i =0 ; i < tampersonagens ; i++){
+            System.out.print("["+personagens[i].getId()+" ## "+personagens[i].getName()+" ## ");
+            String[] alternateNames = personagens[i].getAlternate_names();
+            System.out.print("{");
+            for (int j = 0; j < alternateNames.length; j++) {
+                System.out.print(alternateNames[j]);
+                if (j < alternateNames.length - 1) {
+                    System.out.print(",");
+                }
             }
+            System.out.print("} ## "+personagens[i].getHouse()+
+            " ## "+ personagens[i].getAncestry()+" ## "+ personagens[i].getSpecies()+" ## "+personagens[i].getPatronus()+
+            " ## " +personagens[i].getHogwartsStaff()+" ## " +personagens[i].getHogwartsStudent()+" ## " +personagens[i].getActorName()+
+            " ## " +personagens[i].getAlive()+" ## " + sdf.format(personagens[i].getDateOfBirth())+" ## " +personagens[i].getYearOfBirth()+
+            " ## " +personagens[i].getEyeColour()+" ## " +personagens[i].getGender()+" ## " +personagens[i].getHairColour()+
+            " ## " +personagens[i].getWizard()+"]\n");
         }
-        System.out.print("} ## ");
-        System.out.print(personagens[tampersonagens].getHouse()+" ## "+ 
-        personagens[tampersonagens].getAncestry()+" ## "+
-        personagens[tampersonagens].getSpecies()+" ## "+ 
-        personagens[tampersonagens].getPatronus()+" ## "+
-        personagens[tampersonagens].getHogwartsStaff()+" ## " +
-        personagens[tampersonagens].getHogwartsStudent()+" ## " +
-        personagens[tampersonagens].getActorName()+" ## " +
-        personagens[tampersonagens].getAlive()+" ## " +
-        dataNascimentoFormatada+" ## " +
-        personagens[tampersonagens].getYearOfBirth()+" ## " +
-        personagens[tampersonagens].getEyeColour()+" ## " +
-        personagens[tampersonagens].getGender()+" ## " +
-        personagens[tampersonagens].getHairColour()+" ## " +
-        personagens[tampersonagens].getWizard()+"]\n");
     }
-}
 
-public class Questao1 extends Personagem{
+    public static int Selecao(){
+        int contOpe = 0;
+        for(int i=0 ; i < (tampersonagens-1) ;i++){
+            int pos = i;
+            Personagem temp = personagens[i];
+            String menorjog = temp.getName();
+
+            for(int j = (i+1) ; j < tampersonagens; j++){
+                if(personagens[pos].getName().compareTo(personagens[j].getName()) > 0){
+                    menorjog = personagens[j].getName();
+                    pos = j;
+                    contOpe++;
+                }
+            }
+            personagens[i] = personagens[pos];
+            personagens[pos] = temp;
+        }
+        return contOpe;
+    }
 
     public static void main(String[] args) throws Exception {
+
+        //tempo inicial do código
+        long tempoInicial = System.currentTimeMillis();
+        //----------------------------------------------//
         
         String IdsPersonagens = "";
         BufferedReader entrada = new BufferedReader(new InputStreamReader(System.in));
@@ -363,9 +376,16 @@ public class Questao1 extends Personagem{
         while(IdsPersonagens.equals("FIM") != true){
             personagens[tampersonagens] = new Personagem();
             TratarString(ler(IdsPersonagens));
-            imprimir();
             tampersonagens += 1;
             IdsPersonagens = entrada.readLine();
         }
+        int operacoes = Selecao();
+        imprimir();
+
+        //arquivo de Matricula selecao 
+        long tempoFinal = System.currentTimeMillis();
+        Arq.openWrite("matrícula_selecao.txt");
+        Arq.println("695161" + "\t" + (tempoFinal - tempoInicial) + operacoes + "\t");
+        Arq.close();
     }
 }

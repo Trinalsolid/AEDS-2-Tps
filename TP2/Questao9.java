@@ -8,9 +8,6 @@ import java.util.Date;
 
 class Personagem{
 
-    public static Personagem[] personagens = new Personagem[1000];
-    public static int tampersonagens = 0;
-
     private String id;
     private String name;
     private String[] alternate_names;
@@ -180,6 +177,38 @@ class Personagem{
         this.wizard = wizard;
     }
 
+    // CLONE
+
+    public Personagem Clone(){
+        Personagem clone = new Personagem();
+
+        clone.id = id ;
+        clone.name = name;
+        clone.alternate_names =alternate_names;
+        clone.house = house;
+        clone.ancestry = ancestry;
+        clone.species = species;
+        clone.patronus = patronus;
+        clone.hogwartsStaff = hogwartsStaff;
+        clone.hogwartsStudent = hogwartsStudent;
+        clone.actorName = actorName;
+        clone.alive = alive;
+        clone.dateOfBirth = dateOfBirth;
+        clone.yearOfBirth = yearOfBirth;
+        clone.eyeColour = eyeColour;
+        clone.gender = gender;
+        clone.hairColour = hairColour;
+        clone.wizard = wizard;
+
+        return clone;
+    }
+}
+
+public class Questao9{
+
+    public static Personagem[] personagens = new Personagem[1000];
+    public static int tampersonagens = 0;
+
     // LEITURA
 
     public static String ler(String entradaid) throws Exception {
@@ -293,69 +322,85 @@ class Personagem{
         personagens[tampersonagens].setWizard(wizard);
     }
 
-    // CLONE
-
-    public Personagem Clone(){
-        Personagem clone = new Personagem();
-
-        clone.id = id ;
-        clone.name = name;
-        clone.alternate_names =alternate_names;
-        clone.house = house;
-        clone.ancestry = ancestry;
-        clone.species = species;
-        clone.patronus = patronus;
-        clone.hogwartsStaff = hogwartsStaff;
-        clone.hogwartsStudent = hogwartsStudent;
-        clone.actorName = actorName;
-        clone.alive = alive;
-        clone.dateOfBirth = dateOfBirth;
-        clone.yearOfBirth = yearOfBirth;
-        clone.eyeColour = eyeColour;
-        clone.gender = gender;
-        clone.hairColour = hairColour;
-        clone.wizard = wizard;
-
-        return clone;
-    }
-
     // IMPRIMIR
     public static void imprimir(){
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        String dataNascimentoFormatada = (personagens[tampersonagens].getDateOfBirth() != null) ? sdf.format(personagens[tampersonagens].getDateOfBirth()) : "N/A";
 
-        System.out.print("["+
-        personagens[tampersonagens].getId()+" ## "+
-        personagens[tampersonagens].getName()+" ## ");
-        String[] alternateNames = personagens[tampersonagens].getAlternate_names();
-        System.out.print("{");
-        for (int i = 0; i < alternateNames.length; i++) {
-            System.out.print(alternateNames[i]);
-            if (i < alternateNames.length - 1) {
-                System.out.print(",");
+        for(int i =0 ; i < tampersonagens ; i++){
+            System.out.print("["+personagens[i].getId()+" ## "+personagens[i].getName()+" ## ");
+            String[] alternateNames = personagens[i].getAlternate_names();
+            System.out.print("{");
+            for (int j = 0; j < alternateNames.length; j++) {
+                System.out.print(alternateNames[j]);
+                if (j < alternateNames.length - 1) {
+                    System.out.print(",");
+                }
+            }
+            System.out.print("} ## "+personagens[i].getHouse()+
+            " ## "+ personagens[i].getAncestry()+" ## "+ personagens[i].getSpecies()+" ## "+personagens[i].getPatronus()+
+            " ## " +personagens[i].getHogwartsStaff()+" ## " +personagens[i].getHogwartsStudent()+" ## " +personagens[i].getActorName()+
+            " ## " +personagens[i].getAlive()+" ## " + sdf.format(personagens[i].getDateOfBirth())+" ## " +personagens[i].getYearOfBirth()+
+            " ## " +personagens[i].getEyeColour()+" ## " +personagens[i].getGender()+" ## " +personagens[i].getHairColour()+
+            " ## " +personagens[i].getWizard()+"]\n");
+        }
+    }
+
+    public static void Heap(int n, int i){
+        int maior = i;
+        int esq = 2 * i + 1;
+        int dir = 2 * i + 2;
+    
+        // verifica se nao eh maior que a raiz
+        if (esq < n){ 
+            if( personagens[esq].getHairColour().compareTo(personagens[maior].getHairColour()) > 0 ){ 
+                maior = esq;
+            }
+            if(personagens[esq].getHairColour().equals(personagens[maior].getHairColour()) && personagens[esq].getName().compareTo(personagens[maior].getName()) > 0){
+                maior = esq;
             }
         }
-        System.out.print("} ## ");
-        System.out.print(personagens[tampersonagens].getHouse()+" ## "+ 
-        personagens[tampersonagens].getAncestry()+" ## "+
-        personagens[tampersonagens].getSpecies()+" ## "+ 
-        personagens[tampersonagens].getPatronus()+" ## "+
-        personagens[tampersonagens].getHogwartsStaff()+" ## " +
-        personagens[tampersonagens].getHogwartsStudent()+" ## " +
-        personagens[tampersonagens].getActorName()+" ## " +
-        personagens[tampersonagens].getAlive()+" ## " +
-        dataNascimentoFormatada+" ## " +
-        personagens[tampersonagens].getYearOfBirth()+" ## " +
-        personagens[tampersonagens].getEyeColour()+" ## " +
-        personagens[tampersonagens].getGender()+" ## " +
-        personagens[tampersonagens].getHairColour()+" ## " +
-        personagens[tampersonagens].getWizard()+"]\n");
+        // verifica se o filho da direita é o maior 
+        if (dir < n) {
+            if( personagens[dir].getHairColour().compareTo(personagens[maior].getHairColour()) > 0 ){ 
+                maior = dir;
+            }
+            if(personagens[dir].getHairColour().equals(personagens[maior].getHairColour()) && personagens[dir].getName().compareTo(personagens[maior].getName()) > 0){
+                maior = dir;
+            }
+        }
+        
+        // verifica se nao eh raiz
+        if (maior != i) {
+            swap(i, maior);
+            // chama o heap 
+            Heap(n, maior);
+        }
     }
-}
 
-public class Questao1 extends Personagem{
+    public static void sort() {
+        // constroi o heap
+        for (int i = tampersonagens / 2 - 1; i >= 0; i--){
+            Heap(tampersonagens, i);
+        }
+        // Retira elesmetos 1 por 1 no array
+        for (int i = tampersonagens - 1; i >= 0; i--){
+          swap(0, i);
+          // chama o heap da sub-arvore
+          Heap(i, 0);
+        }
+    }
+
+    public static void swap(int i, int j) {
+        Personagem temp = personagens[i];
+        personagens[i] = personagens[j];
+        personagens[j] = temp;
+    }
 
     public static void main(String[] args) throws Exception {
+
+        //tempo inicial do código
+        long tempoInicial = System.currentTimeMillis();
+        //----------------------------------------------//
         
         String IdsPersonagens = "";
         BufferedReader entrada = new BufferedReader(new InputStreamReader(System.in));
@@ -363,9 +408,17 @@ public class Questao1 extends Personagem{
         while(IdsPersonagens.equals("FIM") != true){
             personagens[tampersonagens] = new Personagem();
             TratarString(ler(IdsPersonagens));
-            imprimir();
             tampersonagens += 1;
             IdsPersonagens = entrada.readLine();
         }
+        sort();
+        sort();
+        imprimir();
+
+        //arquivo de Matricula sequencial 
+        long tempoFinal = System.currentTimeMillis();
+        Arq.openWrite("matrícula_heapsort.txt");
+        Arq.println("695161" + "\t" + (tempoFinal - tempoInicial) + "\t");
+        Arq.close();
     }
 }
