@@ -274,15 +274,15 @@ public class Questao7{
             personagens[tampersonagens].setPatronus("");
         }
         // HogwartsStaff do Personagem
-        boolean hogwartsStaff = Boolean.parseBoolean(HPpersonagens[7]);
+        boolean hogwartsStaff = HPpersonagens[7].equalsIgnoreCase("verdadeiro");
         personagens[tampersonagens].setHogwartsStaff(hogwartsStaff);
         // Hogwartstudent do Personagem
-        boolean hogwartsStudent = Boolean.parseBoolean(HPpersonagens[8]);
+        boolean hogwartsStudent = HPpersonagens[8].equalsIgnoreCase("verdadeiro");
         personagens[tampersonagens].setHogwartsStudent(String.valueOf(hogwartsStudent));
         // Ator do Personagem
         personagens[tampersonagens].setActorName(HPpersonagens[9]);
         // Personagem Alive
-        boolean alive = Boolean.parseBoolean(HPpersonagens[10]);
+        boolean alive = HPpersonagens[10].equalsIgnoreCase("verdadeiro");
         personagens[tampersonagens].setAlive(alive);
         // Date of birth do Personagem
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
