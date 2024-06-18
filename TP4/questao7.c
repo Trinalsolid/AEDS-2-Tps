@@ -56,18 +56,22 @@ typedef struct Character {
     bool wizard;
 } Character;
 
-typedef struct Node{ 
-    Character elemento; 
-    struct Node *esq; 
-    struct Node *dir; 
-    int fator; 
-}Node; 
+#define TAMANHO_TABELA 21
+typedef struct Celula {
+    Character* elemento;
+    int tamanho;
+}Celula;
+
+typedef struct TabelaHash{
+    Celula tabela[TAMANHO_TABELA];
+}TabelaHash;
 
 // ---------------------------------------------------------------------------------------------------- //
 
 // Global variables
 Character characters[MAX_CHARACTERS];
 int charactersLength = 0; 
+int contador = 0; 
 
 // ---------------------------------------------------------------------------------------------------- //
 
@@ -609,162 +613,67 @@ void startCharacters() {
 //=============================================================================================================
 // METODOS ARVORE AVL 
   
-// A utility function to get the fator of the tree 
-int fator(struct Node *N) { 
-    if (N == NULL){
-        return 0; 
-    } 
-    return N->fator; 
-} 
-  
-// A utility function to get maximum of two integers 
-int max(int a, int b) { 
-    return (a > b)? a : b; 
-} 
-  
-/* Helper function that allocates a new node with the given elemento and 
-NULL esq and dir pointers. */
-struct Node* newNode(Character elemento) { 
-    struct Node* node = (struct Node*) malloc(sizeof(struct Node)); 
-    node->elemento = elemento; 
-    node->esq  = NULL; 
-    node->dir  = NULL; 
-    node->fator = 1;  // new node is initially added at leaf 
-    return(node); 
-} 
-  
-// A utility function to dir rotate subtree rooted with y 
-// See the diagram given above. 
-struct Node *rotacaoDir(struct Node *y){ 
-    struct Node *x = y->esq; 
-    struct Node *T2 = x->dir; 
-  
-    // Perform rotation 
-    x->dir = y; 
-    y->esq = T2; 
-  
-    // Update heights 
-    y->fator = max(fator(y->esq), fator(y->dir)) + 1; 
-    x->fator = max(fator(x->esq), fator(x->dir)) + 1; 
-  
-    // Return new root 
-    return x; 
-} 
-  
-// A utility function to esq rotate subtree rooted with x 
-// See the diagram given above. 
-struct Node *rotacaoEsq(struct Node *x){ 
-    struct Node *y = x->dir; 
-    struct Node *T2 = y->esq; 
-  
-    // Perform rotation 
-    y->esq = x; 
-    x->dir = T2; 
-  
-    //  Update heights 
-    x->fator = max(fator(x->esq), fator(x->dir)) + 1; 
-    y->fator = max(fator(y->esq), fator(y->dir)) + 1; 
-  
-    // Return new root 
-    return y; 
-} 
-  
-// Get Balance factor of node N 
-int getBalance(struct Node *N){ 
-    if (N == NULL){
-        return 0; 
-    } 
-    return fator(N->esq) - fator(N->dir); 
-} 
-  
-// Recursive function to insert a elemento in the subtree rooted 
-// with node and returns the new root of the subtree. 
-struct Node* inserir(struct Node* node, Character elemento) { 
-    /* 1.  Perform the normal BST insertion */
-    if (node == NULL){
-        return(newNode(elemento)); 
-    }else if (strcmp(elemento.name, node->elemento.name) < 0){
-        node->esq = inserir(node->esq, elemento); 
-    }else if (strcmp(elemento.name, node->elemento.name) > 0){
-        node->dir = inserir(node->dir, elemento); 
-    }else{// Equal elementos are not allowed in BST 
-        return node; 
-    } 
-  
-    /* 2. Update fator of this ancestor node */
-    node->fator = 1 + max(fator(node->esq),fator(node->dir)); 
-  
-    /* 3. Get the balance factor of this ancestor 
-    node to check whether this node became 
-    unbalanced */
-    int balance = getBalance(node); 
-  
-    // If this node becomes unbalanced, then 
-    // there are 4 cases 
-  
-    // esq esq Case strcmp(elemento.name, node->esq->elemento.name) < 0
-    if (balance > 1 && strcmp(elemento.name, node->esq->elemento.name) < 0){
-        return rotacaoDir(node); 
-    } 
-  
-    // dir dir Case strcmp(elemento.name, node->dir->elemento.name) > 0
-    if (balance < -1 && strcmp(elemento.name, node->dir->elemento.name) > 0){
-        return rotacaoEsq(node); 
-    } 
-  
-    // esq dir Case strcmp(elemento.name, node->esq->elemento.name) > 0
-    if (balance > 1 && strcmp(elemento.name, node->esq->elemento.name) > 0) { 
-        node->esq =  rotacaoEsq(node->esq); 
-        return rotacaoDir(node); 
-    } 
-  
-    // dir esq Case strcmp(elemento.name,  node->dir->elemento.name) < 0
-    if (balance < -1 && strcmp(elemento.name,  node->dir->elemento.name) < 0){ 
-        node->dir = rotacaoDir(node->dir); 
-        return rotacaoEsq(node); 
-    } 
-  
-    /* return the (unchanged) node pointer */
-    return node; 
+// Função de hash com altura do elemento
+int hashIndireto(int altura) {
+    return altura % TAMANHO_TABELA;
 }
 
-bool pesquisar(char *x, struct Node *root) {
-    printf(" raiz");
-    return pesquisarRec(x, root);
-}
-
-/**
- * Metodo privado recursivo para pesquisar elemento.
- * @param x Elemento que sera procurado.
- * @param i No em analise.
- * @return <code>true</code> se o elemento existir,
- * <code>false</code> em caso contrario.
- */
-bool pesquisarRec(char *x, struct Node *root) {
-    bool resp;
-    if(root == NULL) {
-        resp = false;
-    } else if (strcmp(x , root->elemento.name) == 0) {
-        resp = true;
-    } else if (strcmp(x , root->elemento.name) < 0) {
-        printf(" esq");
-        resp = pesquisarRec(x, root->esq);
-    } else {
-        printf(" dir");
-        resp = pesquisarRec(x, root->dir);
+// Inicializa a tabela hash
+void inicializarTabelaHash(TabelaHash* tabela) {
+    for (int i = 0; i < TAMANHO_TABELA; i++) {
+        tabela->tabela[i].elemento = NULL;
+        tabela->tabela[i].tamanho = 0;
     }
-    return resp;
 }
-  
-// A utility function to print preorder traversal 
-// of the tree. 
-// The function also prints fator of every node 
-void preOrder(struct Node *root){ 
-    if(root != NULL){ 
-        printf("%s\n", root->elemento.name); 
-        preOrder(root->esq); 
-        preOrder(root->dir); 
-    } 
+
+int soma_ascii(char *str) {
+    int soma = 0;
+    
+    // Percorre a string enquanto não for o caractere nulo '\0'
+    while (*str != '\0') {
+        soma += (int) *str;  // Converte o caractere para seu valor ASCII e soma
+        str++;  // Avança para o próximo caractere
+    }
+    
+    return soma;
+}
+
+// Insere um elemento na tabela hash
+void inserirNaTabela(TabelaHash* tabela, Character *elemento) {
+    int valor = soma_ascii(elemento->name);
+    int pos = hashIndireto(valor);
+    
+    // Verifica se o elemento da lista ja existe , se nao , cria um
+    if (tabela->tabela[pos].elemento == NULL) {
+        tabela->tabela[pos].elemento = (Character*)malloc(sizeof(Character));
+    }else{
+        // Realoca a lista de elementoes para incluir mais um
+        tabela->tabela[pos].elemento = (Character*)realloc(tabela->tabela[pos].elemento,(tabela->tabela[pos].tamanho + 1) * sizeof(Character));
+    }
+
+    // Adiciona o elemento à lista
+    tabela->tabela[pos].elemento[tabela->tabela[pos].tamanho] = *elemento;
+    tabela->tabela[pos].tamanho++;
+}
+
+// Busca por um elemento na tabela hash
+bool buscarNaTabela(TabelaHash tabela, char nome[]) {
+    bool resp = false;
+    for (int i = 0; i < TAMANHO_TABELA; i++) {
+        for (int j = 0; j < tabela.tabela[i].tamanho; j++) {
+            if (strcmp(tabela.tabela[i].elemento[j].name, nome) == 0) {
+                resp = true; 
+                contador = i;
+            }
+        }
+    }
+    return resp; 
+}
+
+void freehash(TabelaHash* tabela) {
+    for (int i = 0; i < TAMANHO_TABELA; i++) {
+        free(tabela->tabela[i].elemento);
+    }
 }
 
 // Main
@@ -774,7 +683,8 @@ int main() {
 
     // #1 - Start - Read all characters from file
     startCharacters();
-    struct Node *root = NULL;
+    TabelaHash tabela;
+    inicializarTabelaHash(&tabela);
     // ----------------------------------------------------------------- //
 
     // #2 - Read input and print characters from pub.in id entries
@@ -789,13 +699,9 @@ int main() {
         if(isEnd(id)) break;
         else {
             Character *characterToAdd = character_searchById(id);
-            
+            inserirNaTabela(&tabela, characterToAdd);
             scanf(" %[^\n]s", id); // Read the next ID
         }
-    }
-
-    for (int i = 0; i < charactersLength; i++){
-        root = inserir(root , characters[i]);
     }
 
     // SEGUNDA PARTE DA LEITURA
@@ -805,11 +711,11 @@ int main() {
 
     while(strcmp(nomepersonagem,"FIM") != 0 ){
         printf("%s" , nomepersonagem);
-        int resp = pesquisar(nomepersonagem , root);       
+        int resp = buscarNaTabela(tabela , nomepersonagem);       
         if(resp == 0){
             printf(" NAO\n");
         }else{
-            printf(" SIM\n"); 
+            printf("(pos: %d) SIM\n", contador); 
         }
         
         scanf(" %[^\n]s",nomepersonagem);

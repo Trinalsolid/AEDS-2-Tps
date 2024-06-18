@@ -233,7 +233,7 @@ class HashComRehash {
 	final int NULO = -1;
 
 	public HashComRehash() {
-		this(25);
+		this(21);
 	}
 
 	public HashComRehash(int m) {
@@ -254,13 +254,17 @@ class HashComRehash {
 
 	public boolean inserir(Personagem elemento) {
 		boolean resp = false;
+        int soma = 0;
+        for(int i = 0; i < elemento.getName().length(); i++){
+            soma = soma + (int) elemento.getName().charAt(i);
+        }
 		if (elemento != null) {
-			int pos = h(elemento.getYearOfBirth());
+			int pos = h(soma);
 			if (tabela[pos] == null) {
 				tabela[pos] = elemento;
 				resp = true;
 			} else {
-				pos = reh(elemento.getYearOfBirth());
+				pos = reh(soma);
 				if (tabela[pos] == null) {
 				tabela[pos] = elemento;
 				resp = true;
@@ -300,6 +304,26 @@ class HashComRehash {
         }
         return resp;
    }
+
+    public boolean pesquisar(String elemento) {
+        boolean resp = false;
+        int soma = 0;
+        for(int i = 0; i < elemento.length(); i++){
+            soma = soma + (int) elemento.charAt(i);
+        }
+        int pos = h(soma);
+        if (tabela[pos].getName().compareTo(elemento) == 0) {
+            resp = true;
+            questao6.contpos = pos;
+        } else if (tabela[pos] != null) {
+        pos = reh(soma);
+        if (tabela[pos].getName().compareTo(elemento) == 0) {
+            resp = true;
+            questao6.contpos = pos;
+        }
+        }
+        return resp;
+    }
 }
 
 public class questao6{
@@ -307,6 +331,7 @@ public class questao6{
     public static Personagem[] personagens = new Personagem[1000];
     public static int tampersonagens = 0;
     public static int contador = 0;
+    public static int contpos = 0;
 
     // LEITURA
 
@@ -442,36 +467,18 @@ public class questao6{
         }
         
         // SEGUNDA PARTE DA LEITURA
-        String Nomepersonagensores = "";
-        int alturajog = 0;
+        String NomePersonagem = "";
         boolean saida = false;
-        Nomepersonagensores = entrada.readLine();
+        NomePersonagem = entrada.readLine();
 
-        for(int j =0 ; j< tampersonagens ; j++){
-            if(Nomepersonagensores.compareTo(personagens[j].getName()) == 0){
-                alturajog = personagens[j].getYearOfBirth();
-                j = tampersonagens;
-            }else{
-                alturajog = 0;
-            }
-        }
-
-        while(Nomepersonagensores.equals("FIM") != true){
-            saida = tabelaRehash.pesquisar(alturajog ,Nomepersonagensores);
+        while(NomePersonagem.equals("FIM") != true){
+            saida = tabelaRehash.pesquisar(NomePersonagem);
             if(saida == false){
-                System.out.println(Nomepersonagensores + " NAO");
+                System.out.println(NomePersonagem + " NAO");
             }else{
-                System.out.println(Nomepersonagensores + " SIM"); 
+                System.out.println(NomePersonagem + " (pos: "+ contpos +") SIM"); 
             }
-
-            Nomepersonagensores = entrada.readLine();
-            
-            for(int j =0 ; j< tampersonagens ; j++){
-                if(Nomepersonagensores.compareTo(personagens[j].getName()) == 0){
-                    alturajog = personagens[j].getYearOfBirth();
-                    j = tampersonagens;
-                }
-            }
+            NomePersonagem = entrada.readLine();
         }
 
         //arquivo de Matricula sequencial 

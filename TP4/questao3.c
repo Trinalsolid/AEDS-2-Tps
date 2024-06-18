@@ -56,12 +56,12 @@ typedef struct Character {
     bool wizard;
 } Character;
 
-typedef struct Node{ 
-    Character elemento; 
-    struct Node *esq; 
-    struct Node *dir; 
-    int fator; 
-}Node; 
+typedef struct No {
+    Character elemento;
+    struct No *esq;
+    struct No *dir;
+    int nivel;
+} No;
 
 // ---------------------------------------------------------------------------------------------------- //
 
@@ -608,163 +608,145 @@ void startCharacters() {
 
 //=============================================================================================================
 // METODOS ARVORE AVL 
-  
-// A utility function to get the fator of the tree 
-int fator(struct Node *N) { 
-    if (N == NULL){
-        return 0; 
-    } 
-    return N->fator; 
-} 
-  
-// A utility function to get maximum of two integers 
-int max(int a, int b) { 
-    return (a > b)? a : b; 
-} 
-  
-/* Helper function that allocates a new node with the given elemento and 
-NULL esq and dir pointers. */
-struct Node* newNode(Character elemento) { 
-    struct Node* node = (struct Node*) malloc(sizeof(struct Node)); 
-    node->elemento = elemento; 
-    node->esq  = NULL; 
-    node->dir  = NULL; 
-    node->fator = 1;  // new node is initially added at leaf 
-    return(node); 
-} 
-  
-// A utility function to dir rotate subtree rooted with y 
-// See the diagram given above. 
-struct Node *rotacaoDir(struct Node *y){ 
-    struct Node *x = y->esq; 
-    struct Node *T2 = x->dir; 
-  
-    // Perform rotation 
-    x->dir = y; 
-    y->esq = T2; 
-  
-    // Update heights 
-    y->fator = max(fator(y->esq), fator(y->dir)) + 1; 
-    x->fator = max(fator(x->esq), fator(x->dir)) + 1; 
-  
-    // Return new root 
-    return x; 
-} 
-  
-// A utility function to esq rotate subtree rooted with x 
-// See the diagram given above. 
-struct Node *rotacaoEsq(struct Node *x){ 
-    struct Node *y = x->dir; 
-    struct Node *T2 = y->esq; 
-  
-    // Perform rotation 
-    y->esq = x; 
-    x->dir = T2; 
-  
-    //  Update heights 
-    x->fator = max(fator(x->esq), fator(x->dir)) + 1; 
-    y->fator = max(fator(y->esq), fator(y->dir)) + 1; 
-  
-    // Return new root 
-    return y; 
-} 
-  
-// Get Balance factor of node N 
-int getBalance(struct Node *N){ 
-    if (N == NULL){
-        return 0; 
-    } 
-    return fator(N->esq) - fator(N->dir); 
-} 
-  
-// Recursive function to insert a elemento in the subtree rooted 
-// with node and returns the new root of the subtree. 
-struct Node* inserir(struct Node* node, Character elemento) { 
-    /* 1.  Perform the normal BST insertion */
-    if (node == NULL){
-        return(newNode(elemento)); 
-    }else if (strcmp(elemento.name, node->elemento.name) < 0){
-        node->esq = inserir(node->esq, elemento); 
-    }else if (strcmp(elemento.name, node->elemento.name) > 0){
-        node->dir = inserir(node->dir, elemento); 
-    }else{// Equal elementos are not allowed in BST 
-        return node; 
-    } 
-  
-    /* 2. Update fator of this ancestor node */
-    node->fator = 1 + max(fator(node->esq),fator(node->dir)); 
-  
-    /* 3. Get the balance factor of this ancestor 
-    node to check whether this node became 
-    unbalanced */
-    int balance = getBalance(node); 
-  
-    // If this node becomes unbalanced, then 
-    // there are 4 cases 
-  
-    // esq esq Case strcmp(elemento.name, node->esq->elemento.name) < 0
-    if (balance > 1 && strcmp(elemento.name, node->esq->elemento.name) < 0){
-        return rotacaoDir(node); 
-    } 
-  
-    // dir dir Case strcmp(elemento.name, node->dir->elemento.name) > 0
-    if (balance < -1 && strcmp(elemento.name, node->dir->elemento.name) > 0){
-        return rotacaoEsq(node); 
-    } 
-  
-    // esq dir Case strcmp(elemento.name, node->esq->elemento.name) > 0
-    if (balance > 1 && strcmp(elemento.name, node->esq->elemento.name) > 0) { 
-        node->esq =  rotacaoEsq(node->esq); 
-        return rotacaoDir(node); 
-    } 
-  
-    // dir esq Case strcmp(elemento.name,  node->dir->elemento.name) < 0
-    if (balance < -1 && strcmp(elemento.name,  node->dir->elemento.name) < 0){ 
-        node->dir = rotacaoDir(node->dir); 
-        return rotacaoEsq(node); 
-    } 
-  
-    /* return the (unchanged) node pointer */
-    return node; 
-}
 
-bool pesquisar(char *x, struct Node *root) {
-    printf(" raiz");
-    return pesquisarRec(x, root);
-}
-
-/**
- * Metodo privado recursivo para pesquisar elemento.
- * @param x Elemento que sera procurado.
- * @param i No em analise.
- * @return <code>true</code> se o elemento existir,
- * <code>false</code> em caso contrario.
- */
-bool pesquisarRec(char *x, struct Node *root) {
-    bool resp;
-    if(root == NULL) {
-        resp = false;
-    } else if (strcmp(x , root->elemento.name) == 0) {
-        resp = true;
-    } else if (strcmp(x , root->elemento.name) < 0) {
-        printf(" esq");
-        resp = pesquisarRec(x, root->esq);
-    } else {
-        printf(" dir");
-        resp = pesquisarRec(x, root->dir);
+// Função para criar um novo nó
+No* novoNo(Character elemento) {
+    No* novo = (No*) malloc(sizeof(No));
+    if (novo == NULL) {
+        fprintf(stderr, "Erro: Não foi possível alocar memória para novo nó.\n");
+        exit(EXIT_FAILURE);
     }
-    return resp;
+    novo->elemento = elemento;
+    novo->esq = NULL;
+    novo->dir = NULL;
+    novo->nivel = 1;
+    return novo;
 }
-  
-// A utility function to print preorder traversal 
-// of the tree. 
-// The function also prints fator of every node 
-void preOrder(struct Node *root){ 
-    if(root != NULL){ 
-        printf("%s\n", root->elemento.name); 
-        preOrder(root->esq); 
-        preOrder(root->dir); 
-    } 
+
+// Função para calcular o número de níveis a partir de um nó
+int getNivel(No* no) {
+    return (no == NULL) ? 0 : no->nivel;
+}
+
+// Função para realizar a rotação para a direita
+No* rotacionarDir(No* no) {
+    No* noEsq = no->esq;
+    No* noEsqDir = noEsq->dir;
+
+    noEsq->dir = no;
+    no->esq = noEsqDir;
+
+    // Atualizar níveis
+    if (no != NULL) {
+        no->nivel = 1 + max(getNivel(no->esq), getNivel(no->dir));
+    }
+    if (noEsq != NULL) {
+        noEsq->nivel = 1 + max(getNivel(noEsq->esq), getNivel(noEsq->dir));
+    }
+
+    return noEsq;
+}
+
+// Função para realizar a rotação para a esquerda
+No* rotacionarEsq(No* no) {
+    No* noDir = no->dir;
+    No* noDirEsq = noDir->esq;
+
+    noDir->esq = no;
+    no->dir = noDirEsq;
+
+    // Atualizar níveis
+    if (no != NULL) {
+        no->nivel = 1 + max(getNivel(no->esq), getNivel(no->dir));
+    }
+    if (noDir != NULL) {
+        noDir->nivel = 1 + max(getNivel(noDir->esq), getNivel(noDir->dir));
+    }
+
+    return noDir;
+}
+
+// Função para inserir um elemento na árvore AVL
+No* inserir(No* raiz, Character *elemento) {
+    // Caso base: árvore vazia ou chegou a uma folha
+    if (raiz == NULL) {
+        return novoNo(*elemento);
+    }
+
+    // Inserção recursiva
+    if (strcmp(elemento->name, raiz->elemento.name) < 0) {
+        raiz->esq = inserir(raiz->esq, elemento);
+    } else if (strcmp(elemento->name, raiz->elemento.name) > 0) {
+        raiz->dir = inserir(raiz->dir, elemento);
+    } else {
+        // Elemento já existe na árvore
+        return raiz;
+    }
+
+    // Atualizar o nível do nó atual
+    raiz->nivel = 1 + max(getNivel(raiz->esq), getNivel(raiz->dir));
+
+    // Verificar o fator de balanceamento
+    int fator = getNivel(raiz->dir) - getNivel(raiz->esq);
+
+    // Balanceamento do nó
+    // Caso 1: Desbalanceamento para a direita
+    if (fator > 1 && strcmp(elemento->name , raiz->dir->elemento.name) > 0) {
+        return rotacionarEsq(raiz);
+    }
+    // Caso 2: Desbalanceamento para a esquerda
+    if (fator < -1 && strcmp(elemento->name , raiz->esq->elemento.name) < 0) {
+        return rotacionarDir(raiz);
+    }
+    // Caso 3: Desbalanceamento direita-esquerda
+    if (fator > 1 && strcmp(elemento->name , raiz->dir->elemento.name) < 0) {
+        raiz->dir = rotacionarDir(raiz->dir);
+        return rotacionarEsq(raiz);
+    }
+    // Caso 4: Desbalanceamento esquerda-direita
+    if (fator < -1 && strcmp(elemento->name , raiz->esq->elemento.name) < 0) {
+        raiz->esq = rotacionarEsq(raiz->esq);
+        return rotacionarDir(raiz);
+    }
+
+    // Árvore já balanceada
+    return raiz;
+}
+
+int pesquisar(int x, No* raiz) {
+    printf(" => raiz");
+    return pesquisarRecursivo(x, raiz);
+}
+
+// Função auxiliar privada recursiva para pesquisar elemento na árvore AVL
+int pesquisarRecursivo(int x, No* i) {
+    if (i == NULL) {
+        return 0; // Retorna 0 (false) se o nó atual for nulo
+    }
+    if (strcmp(x , i->elemento.name) == 0) {
+        return 1; // Retorna 1 (true) se encontrar o elemento no nó atual
+    }
+    if (strcmp(x , i->elemento.name) < 0) {
+        printf(" esq");
+        return pesquisarRecursivo(x, i->esq); // Procura na subárvore esquerda se x for menor
+    }else{
+        printf(" dir");
+        return pesquisarRecursivo(x, i->dir); // Procura na subárvore direita se x for maior
+    }
+}
+
+// Função para calcular o máximo entre dois números
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+// Função para percorrer a árvore em ordem central (inorder)
+void caminharCentral(No* raiz) {
+    if (raiz != NULL) {
+        caminharCentral(raiz->esq);
+        printf("%d ", raiz->elemento);
+        caminharCentral(raiz->dir);
+    }
 }
 
 // Main
@@ -774,7 +756,7 @@ int main() {
 
     // #1 - Start - Read all characters from file
     startCharacters();
-    struct Node *root = NULL;
+    No *raiz = NULL;
     // ----------------------------------------------------------------- //
 
     // #2 - Read input and print characters from pub.in id entries
@@ -789,14 +771,11 @@ int main() {
         if(isEnd(id)) break;
         else {
             Character *characterToAdd = character_searchById(id);
-            
+            raiz = inserir(raiz , characterToAdd);
             scanf(" %[^\n]s", id); // Read the next ID
         }
     }
 
-    for (int i = 0; i < charactersLength; i++){
-        root = inserir(root , characters[i]);
-    }
 
     // SEGUNDA PARTE DA LEITURA
 
@@ -805,7 +784,7 @@ int main() {
 
     while(strcmp(nomepersonagem,"FIM") != 0 ){
         printf("%s" , nomepersonagem);
-        int resp = pesquisar(nomepersonagem , root);       
+        int resp = pesquisar(nomepersonagem , raiz);       
         if(resp == 0){
             printf(" NAO\n");
         }else{

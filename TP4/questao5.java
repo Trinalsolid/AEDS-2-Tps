@@ -253,8 +253,12 @@ class HashReserva{
  
 	public boolean inserir(Personagem elemento) {
 		boolean resp = false;
+        int soma = 0;
+        for(int i = 0; i < elemento.getName().length(); i++){
+            soma = soma + (int) elemento.getName().charAt(i);
+        }
 		if (elemento != null) {
-			int pos = h(elemento.getYearOfBirth());
+			int pos = h(soma);
 			if (tabela[pos] == null) {
 				tabela[pos] = elemento;
 				resp = true;
@@ -281,6 +285,7 @@ class HashReserva{
 		for(int i = 0; i < m ; i++){
 			if(tabela[i] != null && tabela[i].getName().compareTo(linha) == 0){
 				resp = true;
+                questao5.pos = i;
 				break;
 			}else{
 				resp = false;
@@ -297,6 +302,7 @@ public class questao5{
     public static Personagem personagens = new Personagem();
     public static int tampersonagens = 0;
     public static int contador = 0;
+    public static int pos = 0;
 
     // LEITURA
 
@@ -440,7 +446,7 @@ public class questao5{
             if(saida == false){
                 System.out.println(NomePersonagem + " NAO");
             }else{
-                System.out.println(NomePersonagem + " SIM"); 
+                System.out.println(NomePersonagem + " (Posicao: "+ pos +") SIM"); 
             }
             NomePersonagem = entrada.readLine();
         }

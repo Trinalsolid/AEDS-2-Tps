@@ -306,7 +306,7 @@ class ArvoreArvore {
 	
 	public boolean pesquisar(String x){
         if(raiz != null){
-            System.out.print(x + " raiz");
+            System.out.print(x + "=> raiz");
 	    }
         return pesquisar(x,raiz);
 	} 
@@ -316,11 +316,11 @@ class ArvoreArvore {
         if(i != null){    
             resp=pesquisar2(x,i.outro);
             if(resp == false){ 
-                System.out.print(" esq");
+                System.out.print("-> esq");
                 resp= pesquisar(x,i.esq);
             }
             if(resp == false){ 
-                System.out.print(" dir");
+                System.out.print("-> dir");
                 resp=pesquisar(x,i.dir);
             }
         }
