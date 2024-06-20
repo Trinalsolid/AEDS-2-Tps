@@ -269,7 +269,7 @@ class ArvoreBinaria {
 	 * <code>false</code> em caso contrario.
 	 */
 	public boolean pesquisar(String x) {
-        System.out.print(x +"=> raiz ");
+        System.out.print(x +" => raiz ");
 		return pesquisar(x, raiz);
 	}
 

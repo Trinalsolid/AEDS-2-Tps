@@ -1,8 +1,8 @@
+// Includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <math.h>
 
 // ---------------------------------------------------------------------------------------------------- //
 
@@ -22,14 +22,14 @@
 #define MAX_EYE_COLOUR_SIZE 10
 #define MAX_GENDER_SIZE 10
 #define MAX_HAIR_COLOUR_SIZE 10
-#define MAX_LINE_SIZE 300
 
-#define MAXTAM 5
+#define MAX_LINE_SIZE 300
 
 // ---------------------------------------------------------------------------------------------------- //
 
 // Structs
 typedef struct Date {
+
     int day;
     int month;
     int year;
@@ -56,18 +56,18 @@ typedef struct Character {
     bool wizard;
 } Character;
 
-typedef struct No {
-    Character elemento;
-    struct No *esq;
-    struct No *dir;
-    int nivel;
-} No;
+struct Node { 
+    Character key; 
+    struct Node *left; 
+    struct Node *right; 
+    int height; 
+}; 
 
 // ---------------------------------------------------------------------------------------------------- //
 
 // Global variables
 Character characters[MAX_CHARACTERS];
-int charactersLength = 0; 
+int charactersLength = 0;
 
 // ---------------------------------------------------------------------------------------------------- //
 
@@ -191,7 +191,7 @@ char *character_getYearOfBirth(Character *character) {
     char *yearOfBirth = (char *) calloc(15, sizeof(char));
     strcpy(yearOfBirth, "N/A");
 
-    if(character->yearOfBirth != -1) sprintf(yearOfBirth, "%d", character->yearOfBirth);
+    if(character -> yearOfBirth != -1) sprintf(yearOfBirth, "%d", character -> yearOfBirth);
     return yearOfBirth;
 }
 
@@ -201,8 +201,9 @@ char *character_getBirthDate(Character *character) {
     char *birthDate = (char *) calloc(15, sizeof(char));
     strcpy(birthDate, "N/A");
 
-    if(character->birthDate.day != -1 && character->birthDate.month != -1 && character->birthDate.year != -1) {
-        sprintf(birthDate, "%d-%d-%d", character->birthDate.day, character->birthDate.month, character->birthDate.year);
+    if(character -> birthDate.day != -1 && character -> birthDate.month != -1 && character -> birthDate.year != -1) {
+
+        sprintf(birthDate, "%02d-%02d-%04d", character -> birthDate.day, character -> birthDate.month, character -> birthDate.year);
     }
 
     return birthDate;
@@ -247,20 +248,19 @@ void character_setGender(Character *character, char *gender) { strcpy(character 
 void character_setHairColour(Character *character, char *hairColour) { strcpy(character -> hairColour, hairColour); }
 void character_setWizard(Character *character, bool wizard) { character -> wizard = wizard; }
 
-void character_setBirthDate(Character *character, int birthDate) { 
+void character_setBirthDate(Character *character, char *birthDate) { 
 
     // Explode birthDate in format DD-MM-YYYY if in format DD-MM-YYYY
     if(strlen(birthDate) >= 8 && strlen(birthDate) <= 10) {
 
         char *token = strtok(birthDate, "-");
-        character->birthDate.day = atoi(token);
+
+        character -> birthDate.day = atoi(token);
         token = strtok(NULL, "-");
         character -> birthDate.month = atoi(token);
         token = strtok(NULL, "-");
         character -> birthDate.year = atoi(token);
     }
-    
-    
 }
 
 void character_setAlternateNames(Character *character, char *alternateNames) {
@@ -452,9 +452,10 @@ Character *character_clone(Character *character) {
     return clone;
 }
 
-void character_print(Character *character , int i) {
-    printf("[%d ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s]\n",
-        i,
+void character_print(Character *character) {
+
+    printf("[%s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s]\n",
+
         character_getId(character),
         character_getName(character),
         character_getAlternateNames(character),
@@ -560,6 +561,7 @@ Character character_read(char *line) {
 Character *character_searchById(char *id) {
 
     for(int i = 0; i < charactersLength; i++) {
+
         if(!strcmp(characters[i].id, id)) return &characters[i];
     }
     return NULL;
@@ -572,7 +574,7 @@ void startCharacters() {
     FILE *fp;
     char *line = NULL;
     size_t len = 0;
-    size_t read;
+    ssize_t read;
 
     fp = fopen(FILE_PATH, "r");
 
@@ -606,149 +608,154 @@ void startCharacters() {
     if(line) free(line);
 }
 
-//=============================================================================================================
-// METODOS ARVORE AVL 
-
-// Função para criar um novo nó
-No* novoNo(Character elemento) {
-    No* novo = (No*) malloc(sizeof(No));
-    if (novo == NULL) {
-        fprintf(stderr, "Erro: Não foi possível alocar memória para novo nó.\n");
-        exit(EXIT_FAILURE);
-    }
-    novo->elemento = elemento;
-    novo->esq = NULL;
-    novo->dir = NULL;
-    novo->nivel = 1;
-    return novo;
+// ---------------------------------------------------------------------------------------------------- //
+  
+// A utility function to get the height of the tree 
+int height(struct Node *N) 
+{ 
+    if (N == NULL) 
+        return 0; 
+    return N->height; 
+} 
+  
+// A utility function to get maximum of two integers 
+int max(int a, int b) { 
+    return (a > b)? a : b; 
+} 
+  
+/* Helper function that allocates a new node with the given key and 
+    NULL left and right pointers. */
+struct Node* newNode(Character key){ 
+    struct Node* node = (struct Node*)malloc(sizeof(struct Node)); 
+    node->key  = key; 
+    node->left   = NULL; 
+    node->right  = NULL; 
+    node->height = 1;  // new node is initially added at leaf 
+    return(node); 
+} 
+  
+// A utility function to right rotate subtree rooted with y 
+// See the diagram given above. 
+struct Node *rightRotate(struct Node *y) 
+{ 
+    struct Node *x = y->left; 
+    struct Node *T2 = x->right; 
+  
+    // Perform rotation 
+    x->right = y; 
+    y->left = T2; 
+  
+    // Update heights 
+    y->height = max(height(y->left), 
+                    height(y->right)) + 1; 
+    x->height = max(height(x->left), 
+                    height(x->right)) + 1; 
+  
+    // Return new root 
+    return x; 
+} 
+  
+// A utility function to left rotate subtree rooted with x 
+// See the diagram given above. 
+struct Node *leftRotate(struct Node *x) 
+{ 
+    struct Node *y = x->right; 
+    struct Node *T2 = y->left; 
+  
+    // Perform rotation 
+    y->left = x; 
+    x->right = T2; 
+  
+    //  Update heights 
+    x->height = max(height(x->left),    
+                    height(x->right)) + 1; 
+    y->height = max(height(y->left), 
+                    height(y->right)) + 1; 
+  
+    // Return new root 
+    return y; 
+} 
+  
+// Get Balance factor of node N 
+int getBalance(struct Node *N) { 
+    if (N == NULL) 
+        return 0; 
+    return height(N->left) - height(N->right); 
+} 
+  
+// Recursive function to insert a key in the subtree rooted 
+// with node and returns the new root of the subtree. 
+struct Node* insert(struct Node* node, Character *key){ 
+    /* 1.  Perform the normal BST insertion */
+    if (node == NULL) 
+        return(newNode(*key)); 
+  
+    if(strcmp(key->name , node->key.name) < 0) 
+        node->left  = insert(node->left, key); 
+    else if (strcmp(key->name , node->key.name) > 0) 
+        node->right = insert(node->right, key); 
+    else // Equal keys are not allowed in BST 
+        return node; 
+  
+    /* 2. Update height of this ancestor node */
+    node->height = 1 + max(height(node->left), 
+                        height(node->right)); 
+  
+    /* 3. Get the balance factor of this ancestor 
+          node to check whether this node became 
+          unbalanced */
+    int balance = getBalance(node); 
+  
+    // If this node becomes unbalanced, then 
+    // there are 4 cases 
+  
+    // Left Left Case 
+    if (balance > 1 && strcmp(key->name , node->left->key.name) < 0) 
+        return rightRotate(node); 
+  
+    // Right Right Case 
+    if (balance < -1 && strcmp(key->name , node->right->key.name) > 0) 
+        return leftRotate(node); 
+  
+    // Left Right Case 
+    if (balance > 1 && strcmp(key->name , node->left->key.name) > 0) 
+    { 
+        node->left =  leftRotate(node->left); 
+        return rightRotate(node); 
+    } 
+  
+    // Right Left Case 
+    if (balance < -1 && strcmp(key->name , node->right->key.name) < 0) 
+    { 
+        node->right = rightRotate(node->right); 
+        return leftRotate(node); 
+    } 
+  
+    /* return the (unchanged) node pointer */
+    return node; 
 }
 
-// Função para calcular o número de níveis a partir de um nó
-int getNivel(No* no) {
-    return (no == NULL) ? 0 : no->nivel;
-}
 
-// Função para realizar a rotação para a direita
-No* rotacionarDir(No* no) {
-    No* noEsq = no->esq;
-    No* noEsqDir = noEsq->dir;
-
-    noEsq->dir = no;
-    no->esq = noEsqDir;
-
-    // Atualizar níveis
-    if (no != NULL) {
-        no->nivel = 1 + max(getNivel(no->esq), getNivel(no->dir));
-    }
-    if (noEsq != NULL) {
-        noEsq->nivel = 1 + max(getNivel(noEsq->esq), getNivel(noEsq->dir));
-    }
-
-    return noEsq;
-}
-
-// Função para realizar a rotação para a esquerda
-No* rotacionarEsq(No* no) {
-    No* noDir = no->dir;
-    No* noDirEsq = noDir->esq;
-
-    noDir->esq = no;
-    no->dir = noDirEsq;
-
-    // Atualizar níveis
-    if (no != NULL) {
-        no->nivel = 1 + max(getNivel(no->esq), getNivel(no->dir));
-    }
-    if (noDir != NULL) {
-        noDir->nivel = 1 + max(getNivel(noDir->esq), getNivel(noDir->dir));
-    }
-
-    return noDir;
-}
-
-// Função para inserir um elemento na árvore AVL
-No* inserir(No* raiz, Character *elemento) {
-    // Caso base: árvore vazia ou chegou a uma folha
-    if (raiz == NULL) {
-        return novoNo(*elemento);
-    }
-
-    // Inserção recursiva
-    if (strcmp(elemento->name, raiz->elemento.name) < 0) {
-        raiz->esq = inserir(raiz->esq, elemento);
-    } else if (strcmp(elemento->name, raiz->elemento.name) > 0) {
-        raiz->dir = inserir(raiz->dir, elemento);
-    } else {
-        // Elemento já existe na árvore
-        return raiz;
-    }
-
-    // Atualizar o nível do nó atual
-    raiz->nivel = 1 + max(getNivel(raiz->esq), getNivel(raiz->dir));
-
-    // Verificar o fator de balanceamento
-    int fator = getNivel(raiz->dir) - getNivel(raiz->esq);
-
-    // Balanceamento do nó
-    // Caso 1: Desbalanceamento para a direita
-    if (fator > 1 && strcmp(elemento->name , raiz->dir->elemento.name) > 0) {
-        return rotacionarEsq(raiz);
-    }
-    // Caso 2: Desbalanceamento para a esquerda
-    if (fator < -1 && strcmp(elemento->name , raiz->esq->elemento.name) < 0) {
-        return rotacionarDir(raiz);
-    }
-    // Caso 3: Desbalanceamento direita-esquerda
-    if (fator > 1 && strcmp(elemento->name , raiz->dir->elemento.name) < 0) {
-        raiz->dir = rotacionarDir(raiz->dir);
-        return rotacionarEsq(raiz);
-    }
-    // Caso 4: Desbalanceamento esquerda-direita
-    if (fator < -1 && strcmp(elemento->name , raiz->esq->elemento.name) < 0) {
-        raiz->esq = rotacionarEsq(raiz->esq);
-        return rotacionarDir(raiz);
-    }
-
-    // Árvore já balanceada
-    return raiz;
-}
-
-int pesquisar(int x, No* raiz) {
-    printf(" => raiz");
-    return pesquisarRecursivo(x, raiz);
-}
-
-// Função auxiliar privada recursiva para pesquisar elemento na árvore AVL
-int pesquisarRecursivo(int x, No* i) {
-    if (i == NULL) {
-        return 0; // Retorna 0 (false) se o nó atual for nulo
-    }
-    if (strcmp(x , i->elemento.name) == 0) {
-        return 1; // Retorna 1 (true) se encontrar o elemento no nó atual
-    }
-    if (strcmp(x , i->elemento.name) < 0) {
+int pesquisArvore(struct Node *i , char *key){
+    int resp = 0;
+    if (i == NULL){
+        return resp;
+    }else if (strcmp(key , i->key.name) == 0){
+        return resp = 1;
+    }else if (strcmp(key , i->key.name) < 0){
         printf(" esq");
-        return pesquisarRecursivo(x, i->esq); // Procura na subárvore esquerda se x for menor
+        return pesquisArvore(i->left,key);
     }else{
         printf(" dir");
-        return pesquisarRecursivo(x, i->dir); // Procura na subárvore direita se x for maior
+        return pesquisArvore(i->right,key);
     }
 }
 
-// Função para calcular o máximo entre dois números
-int max(int a, int b) {
-    return (a > b) ? a : b;
+int pesquisa(struct Node *root , char *key){
+    printf(" => raiz");
+    int resp = pesquisArvore(root , key);
+    return resp;
 }
-
-// Função para percorrer a árvore em ordem central (inorder)
-void caminharCentral(No* raiz) {
-    if (raiz != NULL) {
-        caminharCentral(raiz->esq);
-        printf("%d ", raiz->elemento);
-        caminharCentral(raiz->dir);
-    }
-}
-
 // Main
 int main() {
 
@@ -756,42 +763,42 @@ int main() {
 
     // #1 - Start - Read all characters from file
     startCharacters();
-    No *raiz = NULL;
+    struct Node *root = NULL;
     // ----------------------------------------------------------------- //
 
     // #2 - Read input and print characters from pub.in id entries
     char id[MAX_UUID_SIZE];
-    scanf(" %[^\n]s", id);
+    scanf("%99[^\n]%*c", id);
+    id[strcspn(id, "\r")] = '\0';
 
     while(true) {
 
-        // Clean \n from the end of the string
-        if(id[strlen(id) - 1] == '\n' || id[strlen(id) - 1] == '\r') id[strlen(id) - 1] = '\0';
-
         if(isEnd(id)) break;
         else {
-            Character *characterToAdd = character_searchById(id);
-            raiz = inserir(raiz , characterToAdd);
-            scanf(" %[^\n]s", id); // Read the next ID
+            
+            Character *character = character_searchById(id);
+            root = insert(root, character);
+    
+            scanf("%99[^\n]%*c", id);
+            id[strcspn(id, "\r")] = '\0';
         }
     }
 
+    char NomePersonagem[100];
+    scanf("%99[^\n]%*c", NomePersonagem);
+    NomePersonagem[strcspn(NomePersonagem, "\r")] = '\0';
 
-    // SEGUNDA PARTE DA LEITURA
-
-    char nomepersonagem[100];
-    scanf(" %[^\n]s",nomepersonagem);
-
-    while(strcmp(nomepersonagem,"FIM") != 0 ){
-        printf("%s" , nomepersonagem);
-        int resp = pesquisar(nomepersonagem , raiz);       
+    while(strcmp(NomePersonagem,"FIM") != 0 ){
+        printf("%s" , NomePersonagem);
+        int resp = pesquisa(root ,NomePersonagem);       
         if(resp == 0){
             printf(" NAO\n");
         }else{
             printf(" SIM\n"); 
         }
         
-        scanf(" %[^\n]s",nomepersonagem);
+        scanf("%99[^\n]%*c", NomePersonagem);
+        NomePersonagem[strcspn(NomePersonagem, "\r")] = '\0';
     }
 
     return 0;

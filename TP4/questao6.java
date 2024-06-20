@@ -227,84 +227,58 @@ class Personagem{
     }
 }
 
-class HashComRehash {
-	Personagem tabela[];
-	int m;
-	final int NULO = -1;
-
-	public HashComRehash() {
-		this(21);
-	}
-
-	public HashComRehash(int m) {
-		this.m = m;
-		this.tabela = new Personagem[this.m];
-		for (int i = 0; i < m; i++) {
-			tabela[i] = null;
-		}
-	}
-
-	public int h(int elemento) {
-		return elemento % m;
-	}
-
-	public int reh(int elemento) {
-		return (elemento+1)% m;
-	}
-
-	public boolean inserir(Personagem elemento) {
-		boolean resp = false;
-        int soma = 0;
-        for(int i = 0; i < elemento.getName().length(); i++){
-            soma = soma + (int) elemento.getName().charAt(i);
+class HashReHash{
+    Personagem tabela[];
+    int m;
+    int NULO = -1;
+ 
+    public HashReHash() {
+        this(21);
+    }
+ 
+    public HashReHash(int m) {
+        this.m = m;
+        this.tabela = new Personagem[this.m];
+        for (int i = 0; i < m; i++) {
+            tabela[i] = null;
         }
-		if (elemento != null) {
-			int pos = h(soma);
-			if (tabela[pos] == null) {
-				tabela[pos] = elemento;
-				resp = true;
-			} else {
-				pos = reh(soma);
-				if (tabela[pos] == null) {
-				tabela[pos] = elemento;
-				resp = true;
-				}
-			}
-		}
-		return resp;
-	}
+    }
+ 
+    public int h(int elemento) {
+        return elemento % m;
+    }
+ 
+    public int reh(int elemento) {
+        return ++elemento % m;
+    }
+ 
+    public int valorAscII(Personagem elemento) {
+        int ascii = 0;
+        String nome = elemento.getName();
+        for (int i = 0; i < nome.length(); i++) {
+            ascii = ascii + (int) nome.charAt(i);
+        }
+        return ascii;
+    }
 
-    public boolean pesquisar(int altura) {
+    public boolean inserir(Personagem elemento) {
         boolean resp = false;
-        int pos = h(altura);
-
-        // Procura na posição calculada pela função de hash
-        if (tabela[pos] != null && tabela[pos].getYearOfBirth() == altura) {
-            resp = true;
-        } else {
-            // Procura na posição recalculada pela função de rehash
-            pos = reh(altura);
-            if (tabela[pos] != null && tabela[pos].getYearOfBirth() == altura) {
+        if (elemento != null) {
+            int pos = h(valorAscII(elemento));
+            if (tabela[pos] == null) {
+                tabela[pos] = elemento;
                 resp = true;
+            } else {
+                pos = reh(valorAscII(elemento));
+                if (tabela[pos] == null) {
+                    tabela[pos] = elemento;
+                    resp = true;
+                }
             }
         }
         return resp;
     }
-
-	public boolean pesquisar(int elemento , String nomejog) {
-        boolean resp = false;
-        int pos = h(elemento);
-        if (tabela[pos].getName().compareTo(nomejog) == 0) {
-            resp = true;
-        }else if (tabela[pos] != null) {
-            pos = reh(elemento);
-            if (tabela[pos].getName().compareTo(nomejog) == 0) {
-                resp = true;
-            }
-        }
-        return resp;
-   }
-
+ 
     public boolean pesquisar(String elemento) {
         boolean resp = false;
         int soma = 0;
@@ -312,19 +286,20 @@ class HashComRehash {
             soma = soma + (int) elemento.charAt(i);
         }
         int pos = h(soma);
-        if (tabela[pos].getName().compareTo(elemento) == 0) {
+        if (tabela[pos] != null && tabela[pos].getName().compareTo(elemento) == 0) {
             resp = true;
             questao6.contpos = pos;
         } else if (tabela[pos] != null) {
-        pos = reh(soma);
-        if (tabela[pos].getName().compareTo(elemento) == 0) {
-            resp = true;
-            questao6.contpos = pos;
-        }
+            pos = reh(soma);
+            if (tabela[pos] != null && tabela[pos].getName().compareTo(elemento) == 0) {
+                resp = true;
+                questao6.contpos = pos;
+            }
         }
         return resp;
     }
 }
+ 
 
 public class questao6{
 
@@ -452,7 +427,7 @@ public class questao6{
         long tempoInicial = System.currentTimeMillis();
         //----------------------------------------------//
 
-        HashComRehash tabelaRehash = new HashComRehash();
+        HashReHash tabelaRehash = new HashReHash();
         String IdsPersonagens = "";
         BufferedReader entrada = new BufferedReader(new InputStreamReader(System.in));
         IdsPersonagens = entrada.readLine();

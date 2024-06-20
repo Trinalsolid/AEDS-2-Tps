@@ -1,8 +1,8 @@
+// Includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <math.h>
 
 // ---------------------------------------------------------------------------------------------------- //
 
@@ -22,9 +22,8 @@
 #define MAX_EYE_COLOUR_SIZE 10
 #define MAX_GENDER_SIZE 10
 #define MAX_HAIR_COLOUR_SIZE 10
-#define MAX_LINE_SIZE 300
 
-#define MAXTAM 5
+#define MAX_LINE_SIZE 300
 
 // ---------------------------------------------------------------------------------------------------- //
 
@@ -36,7 +35,6 @@ typedef struct Date {
 } Date;
 
 typedef struct Character {
-
     char *id;
     char *name;
     char *alternateNames[MAX_ALTERNATE_NAMES];
@@ -56,23 +54,20 @@ typedef struct Character {
     bool wizard;
 } Character;
 
-#define TAMANHO_TABELA 21
-typedef struct Celula {
-    Character* elemento;
-    int tamanho;
-}Celula;
+typedef struct node {
+    char* name;
+    struct node* prox;
+} node;
 
-typedef struct TabelaHash{
-    Celula tabela[TAMANHO_TABELA];
-}TabelaHash;
+#define HASH_MAX 21
+node* hashtable[HASH_MAX];
 
 // ---------------------------------------------------------------------------------------------------- //
 
 // Global variables
 Character characters[MAX_CHARACTERS];
-int charactersLength = 0; 
-int contador = 0; 
-
+int charactersLength = 0;
+int cont =0;
 // ---------------------------------------------------------------------------------------------------- //
 
 // Functions 
@@ -195,7 +190,7 @@ char *character_getYearOfBirth(Character *character) {
     char *yearOfBirth = (char *) calloc(15, sizeof(char));
     strcpy(yearOfBirth, "N/A");
 
-    if(character->yearOfBirth != -1) sprintf(yearOfBirth, "%d", character->yearOfBirth);
+    if(character -> yearOfBirth != -1) sprintf(yearOfBirth, "%d", character -> yearOfBirth);
     return yearOfBirth;
 }
 
@@ -205,8 +200,9 @@ char *character_getBirthDate(Character *character) {
     char *birthDate = (char *) calloc(15, sizeof(char));
     strcpy(birthDate, "N/A");
 
-    if(character->birthDate.day != -1 && character->birthDate.month != -1 && character->birthDate.year != -1) {
-        sprintf(birthDate, "%d-%d-%d", character->birthDate.day, character->birthDate.month, character->birthDate.year);
+    if(character -> birthDate.day != -1 && character -> birthDate.month != -1 && character -> birthDate.year != -1) {
+
+        sprintf(birthDate, "%02d-%02d-%04d", character -> birthDate.day, character -> birthDate.month, character -> birthDate.year);
     }
 
     return birthDate;
@@ -251,20 +247,19 @@ void character_setGender(Character *character, char *gender) { strcpy(character 
 void character_setHairColour(Character *character, char *hairColour) { strcpy(character -> hairColour, hairColour); }
 void character_setWizard(Character *character, bool wizard) { character -> wizard = wizard; }
 
-void character_setBirthDate(Character *character, int birthDate) { 
+void character_setBirthDate(Character *character, char *birthDate) { 
 
     // Explode birthDate in format DD-MM-YYYY if in format DD-MM-YYYY
     if(strlen(birthDate) >= 8 && strlen(birthDate) <= 10) {
 
         char *token = strtok(birthDate, "-");
-        character->birthDate.day = atoi(token);
+
+        character -> birthDate.day = atoi(token);
         token = strtok(NULL, "-");
         character -> birthDate.month = atoi(token);
         token = strtok(NULL, "-");
         character -> birthDate.year = atoi(token);
     }
-    
-    
 }
 
 void character_setAlternateNames(Character *character, char *alternateNames) {
@@ -456,9 +451,10 @@ Character *character_clone(Character *character) {
     return clone;
 }
 
-void character_print(Character *character , int i) {
-    printf("[%d ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s]\n",
-        i,
+void character_print(Character *character) {
+
+    printf("[%s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s ## %s]\n",
+
         character_getId(character),
         character_getName(character),
         character_getAlternateNames(character),
@@ -564,6 +560,7 @@ Character character_read(char *line) {
 Character *character_searchById(char *id) {
 
     for(int i = 0; i < charactersLength; i++) {
+
         if(!strcmp(characters[i].id, id)) return &characters[i];
     }
     return NULL;
@@ -576,7 +573,7 @@ void startCharacters() {
     FILE *fp;
     char *line = NULL;
     size_t len = 0;
-    size_t read;
+    ssize_t read;
 
     fp = fopen(FILE_PATH, "r");
 
@@ -610,71 +607,53 @@ void startCharacters() {
     if(line) free(line);
 }
 
-//=============================================================================================================
-// METODOS ARVORE AVL 
-  
-// Função de hash com altura do elemento
-int hashIndireto(int altura) {
-    return altura % TAMANHO_TABELA;
+//=============================================================================================================================================
+
+int hash(char* str){
+	int sum = 0;
+	for (int j = 0; str[j] != '\0'; j++){
+		sum +=str[j];
+	}
+	return sum % HASH_MAX;
 }
 
-// Inicializa a tabela hash
-void inicializarTabelaHash(TabelaHash* tabela) {
-    for (int i = 0; i < TAMANHO_TABELA; i++) {
-        tabela->tabela[i].elemento = NULL;
-        tabela->tabela[i].tamanho = 0;
+void inserir(char* a){
+    int n = hash(a);
+    node* new_node = malloc(sizeof(node));
+    if (new_node == NULL)
+        exit(1);
+    else{
+        new_node->name = a;
+        new_node->prox = hashtable[n];
+        hashtable[n] = new_node;
     }
 }
 
-int soma_ascii(char *str) {
-    int soma = 0;
-    
-    // Percorre a string enquanto não for o caractere nulo '\0'
-    while (*str != '\0') {
-        soma += (int) *str;  // Converte o caractere para seu valor ASCII e soma
-        str++;  // Avança para o próximo caractere
+void remover(node* node_ptr) {
+    if (node_ptr->prox == NULL)
+        free(node_ptr);
+    else {
+        remover(node_ptr->prox);
+        free(node_ptr);
     }
-    
-    return soma;
+    return;
 }
 
-// Insere um elemento na tabela hash
-void inserirNaTabela(TabelaHash* tabela, Character *elemento) {
-    int valor = soma_ascii(elemento->name);
-    int pos = hashIndireto(valor);
-    
-    // Verifica se o elemento da lista ja existe , se nao , cria um
-    if (tabela->tabela[pos].elemento == NULL) {
-        tabela->tabela[pos].elemento = (Character*)malloc(sizeof(Character));
-    }else{
-        // Realoca a lista de elementoes para incluir mais um
-        tabela->tabela[pos].elemento = (Character*)realloc(tabela->tabela[pos].elemento,(tabela->tabela[pos].tamanho + 1) * sizeof(Character));
-    }
-
-    // Adiciona o elemento à lista
-    tabela->tabela[pos].elemento[tabela->tabela[pos].tamanho] = *elemento;
-    tabela->tabela[pos].tamanho++;
-}
-
-// Busca por um elemento na tabela hash
-bool buscarNaTabela(TabelaHash tabela, char nome[]) {
-    bool resp = false;
-    for (int i = 0; i < TAMANHO_TABELA; i++) {
-        for (int j = 0; j < tabela.tabela[i].tamanho; j++) {
-            if (strcmp(tabela.tabela[i].elemento[j].name, nome) == 0) {
-                resp = true; 
-                contador = i;
+int pesquisa(char* a){
+    int n = hash(a);
+    if (hashtable[n] != NULL){
+        for (node* tmp = hashtable[n]; tmp !=NULL; tmp = tmp->prox){
+            if (strcmp(tmp->name , a) == 0){
+                cont = n;
+                return 1;
             }
         }
     }
-    return resp; 
+    return 0;
 }
 
-void freehash(TabelaHash* tabela) {
-    for (int i = 0; i < TAMANHO_TABELA; i++) {
-        free(tabela->tabela[i].elemento);
-    }
-}
+//=============================================================================================================================================
+
 
 // Main
 int main() {
@@ -683,43 +662,42 @@ int main() {
 
     // #1 - Start - Read all characters from file
     startCharacters();
-    TabelaHash tabela;
-    inicializarTabelaHash(&tabela);
     // ----------------------------------------------------------------- //
 
     // #2 - Read input and print characters from pub.in id entries
     char id[MAX_UUID_SIZE];
-    scanf(" %[^\n]s", id);
+    scanf("%99[^\n]%*c", id);
+    id[strcspn(id, "\r")] = '\0';
 
     while(true) {
 
-        // Clean \n from the end of the string
-        if(id[strlen(id) - 1] == '\n' || id[strlen(id) - 1] == '\r') id[strlen(id) - 1] = '\0';
-
         if(isEnd(id)) break;
         else {
-            Character *characterToAdd = character_searchById(id);
-            inserirNaTabela(&tabela, characterToAdd);
-            scanf(" %[^\n]s", id); // Read the next ID
+            Character *character = character_searchById(id);
+            inserir(character->name);
+            scanf("%99[^\n]%*c", id);
+            id[strcspn(id, "\r")] = '\0';
         }
+
     }
 
-    // SEGUNDA PARTE DA LEITURA
+    char NomePersonagem[100];
+    scanf("%99[^\n]%*c", NomePersonagem);
+    NomePersonagem[strcspn(NomePersonagem, "\r")] = '\0';
 
-    char nomepersonagem[100];
-    scanf(" %[^\n]s",nomepersonagem);
-
-    while(strcmp(nomepersonagem,"FIM") != 0 ){
-        printf("%s" , nomepersonagem);
-        int resp = buscarNaTabela(tabela , nomepersonagem);       
+    while (strcmp(NomePersonagem, "FIM") != 0) {
+        printf("%s", NomePersonagem);
+        int resp = pesquisa(NomePersonagem);
         if(resp == 0){
             printf(" NAO\n");
         }else{
-            printf("(pos: %d) SIM\n", contador); 
+            printf(" (pos: %d) SIM\n", cont); 
         }
-        
-        scanf(" %[^\n]s",nomepersonagem);
+        scanf("%99[^\n]%*c", NomePersonagem);
+        NomePersonagem[strcspn(NomePersonagem, "\r")] = '\0';
     }
 
     return 0;
 }
+
+

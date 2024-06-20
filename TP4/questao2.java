@@ -228,48 +228,47 @@ class Personagem{
 }
 
 class No {
-	public int elemento; 
-	public No esq, dir;
-	public No2 outro;
+	public int elemento; // Conteudo do no.
+	public No esq; // No da esquerda.
+	public No dir; // No da direita.
+   	public No2 outro;
 	
-	public No(int elemento) { 
-	   this.elemento = elemento;
-	   this.esq = this.dir = null;
-	   this.outro = null;
+    public No(int elemento) {
+		this.elemento = elemento;
+		this.esq = this.dir = null;
+      	this.outro = null;
 	}
- 
-	public No(int elemento, No esq, No dir,No2 outro) {
-	   this.elemento = elemento;
-	   this.esq = esq;
-	   this.dir = dir;
-	   this.outro = outro;
+
+	public No(int elemento, No esq, No dir) {
+		this.elemento = elemento;
+		this.esq = esq;
+		this.dir = dir;
+      	this.outro = null;
 	}
-	
 }
  
 class No2 {
-	public String elemento; 
-	public No2 esq; 
-	public No2 dir; 
- 
-	No2(String elemento) {
-	   this.elemento = elemento;
-	   this.esq = this.dir = null;
+	public Personagem elemento; // Conteudo do no.
+	public No2 esq; // No da esquerda.
+	public No2 dir; // No da direita.
+	
+	No2(Personagem elemento) {
+		this.elemento = elemento;
+		this.esq = this.dir = null;
 	}
- 
-	No2(String elemento, No2 esq, No2 dir) {
-	   this.elemento = elemento;
-	   this.esq = esq;
-	   this.dir = dir;
+
+	No2(Personagem elemento, No2 esq, No2 dir) {
+		this.elemento = elemento;
+		this.esq = esq;
+		this.dir = dir;
 	}
 }
  
 class ArvoreArvore {
 	private No raiz; // Raiz da arvore.
  
-	public ArvoreArvore() throws Exception {
+	public ArvoreArvore() throws Exception{
 	    raiz = null;
-        // insercao na primeira arvore dos elementos 7, 3, 11, 1, 5, 9, 13, 0, 2, 4, 6, 8, 10, 12 e 14.
         inserir(7);
         inserir(3);
         inserir(11);
@@ -306,74 +305,86 @@ class ArvoreArvore {
 	
 	public boolean pesquisar(String x){
         if(raiz != null){
-            System.out.print(x + "=> raiz");
-	    }
+           System.out.print(x + " => raiz");
+        }
         return pesquisar(x,raiz);
-	} 
+    } 
     
-	private boolean pesquisar(String x,No i){
+    private boolean pesquisar(String x,No i){
         boolean resp= false;
         if(i != null){    
-            resp=pesquisar2(x,i.outro);
+            resp = pesquisar2(x, i.outro);
             if(resp == false){ 
-                System.out.print("-> esq");
+                System.out.print(" ESQ");
                 resp= pesquisar(x,i.esq);
             }
             if(resp == false){ 
-                System.out.print("-> dir");
+                System.out.print(" DIR");
                 resp=pesquisar(x,i.dir);
             }
         }
-	    return resp;
-	}
- 
-	private boolean pesquisar2(String x, No2 i) {
-        boolean resp= false;
-        if(i != null){
-            if (x.compareTo(i.elemento)==0) {
-                resp = true;
-            } else{
-                System.out.print(" ESQ");
-                resp = pesquisar2(x, i.esq);
-            
-                if(resp == false){
-                    System.out.print(" DIR");
-                    resp = pesquisar2(x, i.dir);
-                }
-            }
-        }
         return resp;
-	}
+    }
+    private boolean pesquisar2( String x ,No2 no) {
+        boolean resp = false;
+        if (no == null) { 
+            resp = false;
+        } else if (x.compareTo(no.elemento.getName()) < no.elemento.getName().compareTo(x)){
+            System.out.print("->esq"); 
+            resp = pesquisar2( x ,no.esq);
+        } else if (x.compareTo(no.elemento.getName()) > no.elemento.getName().compareTo(x)){
+            System.out.print("->dir");
+            resp = pesquisar2( x, no.dir);
+        }else{
+            resp = true;
+        }
 
-	public void InserirArvore2(String entrada , int y) throws Exception {
-	   inserir2(entrada ,y ,raiz);
-	}
+        return resp;
+    }
 
-	private void inserir2(String entrada , int y, No i) throws Exception {
-        if (i.elemento == y) {
-            i.outro = inserir3(entrada,i.outro);
-        } else if (y < i.elemento ){
-            inserir2(entrada,y,i.esq);
-        } else if (y > i.elemento ){
-            inserir2(entrada,y,i.dir);
+    //======================================================================================================================
+
+    public void inserirString(Personagem s ) throws Exception{
+        inserir1(s, raiz);
+    }
+  
+    public void inserir1(Personagem s,No i) throws Exception {
+        if (i == null) {
+            throw new Exception("Erro ao inserir: caractere invalido!");
+        } else if ((s.getYearOfBirth()%15) < i.elemento) {
+            inserir1( s, i.esq);
+        } else if ((s.getYearOfBirth()%15) > i.elemento) {
+            inserir1(s ,i.dir);
         } else {
-            throw new Exception("Erro ao inserir!");
+            i.outro = inserir2(s, i.outro);
         }
-	}
-   
-	private No2 inserir3(String entrada, No2 i)throws Exception{
-        if(i == null ){
-            i = new No2(entrada);
-        }else if(entrada.compareTo(i.elemento)<0){
-            i.esq=inserir3(entrada,i.esq);
-        }else if(entrada.compareTo(i.elemento)>0)
-            i.dir=inserir3(entrada,i.dir);
-        else {
-            throw new Exception("Erro ao inserir!");
+    }
+  
+    private No2 inserir2(Personagem s, No2 i) throws Exception {
+        if (i == null) {
+            i = new No2(s);
+        } else if (s.getName().compareTo(i.elemento.getName()) < 0) {
+            i.esq = inserir2(s, i.esq);
+        } else if (s.getName().compareTo(i.elemento.getName()) > 0) {
+            i.dir = inserir2(s, i.dir);
+        } else {
+            throw new Exception("Erro ao inserir: elemento existente!");
         }
-
         return i;
-	}
+    }
+
+    public void mostrar() {
+        mostrar(raiz);
+    }
+
+    public void mostrar(No i) {
+        if (i != null) {
+            mostrar(i.esq);
+            System.out.println("numero: " + i.elemento);
+            // mostrar(i.outro);
+            mostrar(i.dir);
+        }
+    }
 }
 
 public class questao2{
@@ -512,8 +523,7 @@ public class questao2{
             IdsPersonagens = entrada.readLine();
         }
         for(int i =0 ; i < tampersonagens ; i++){
-            int valor = personagens[i].getYearOfBirth()%15;
-            arvore.InserirArvore2(personagens[i].getName(), valor);
+            arvore.inserirString(personagens[i]);
         }
         
         // SEGUNDA PARTE DA LEITURA

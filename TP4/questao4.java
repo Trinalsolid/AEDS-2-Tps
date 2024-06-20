@@ -269,7 +269,7 @@ class Alvinegra {
      *         <code>false</code> em caso contrario.
      */
     public boolean pesquisar(String elemento) {
-        System.out.print(elemento +"=> raiz ");
+        System.out.print(elemento +" => raiz ");
         return pesquisar(elemento, raiz);
     }
  
